@@ -1,0 +1,6 @@
+*.sublime-workspace
+*.o
+*.d
+*.elf
+*.gen*
+*.html
