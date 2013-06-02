@@ -72,6 +72,13 @@ class Game {
   CubeSet dirtyCubes; // dirty cubes as a result of paint()
   CubeSet activeCubes; // cubes showing the active scene
 
+  float characterDuration = 1;
+  float characterTimer = 0;
+
+  AssetImage characterImages[kNumCubes];
+  bool characterActing[kNumCubes];
+  int characterFrame = 0;
+
   int readyCubes = 0;
 
   bool ready = false;

@@ -251,28 +251,33 @@ void Game::run() {
 		switch (i) {
 		case 0:
 			crew[i] = SHIP;
-      vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
-      vid[i].bg1.image(vec(0,4), Ship, 0);
+
+      characterImages[i] = Ship;
 			obstacles[i] = ALIEN;
 			break;
 		case 1:
 			crew[i] = CAPTAIN;
-      vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
-      vid[i].bg1.image(vec(7, 8), Captain, 0);
+      characterImages[i] = Captain;
 			obstacles[i] = ASTEROID;
 			break;
 		case 2:
 			crew[i] = ENGINEER;
-      vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
-      vid[i].bg1.image(vec(7, 8), Engineer, 0);
+      characterImages[i] = Engineer;
 			obstacles[i] = IONSTORM;
 			break;
 		case 3:
 			crew[i] = SCIENTIST;
-      vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
-      vid[i].bg1.image(vec(7, 8), Scientist, 0);
+      characterImages[i] = Scientist;
 			break;
 		}
+
+    if (i == 0) {
+      vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
+      vid[i].bg1.image(vec(0,4), characterImages[i], 0);
+    } else {
+      vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+      vid[i].bg1.image(vec(7, 8), characterImages[i], 0);
+    }
 	}
 
 	obstacleEncountered = false;
@@ -290,6 +295,26 @@ void Game::run() {
 }
 
 void Game::Update(TimeDelta timeStep){
+
+  characterTimer += timeStep.seconds();
+
+  if (characterTimer >= characterDuration) {
+    characterTimer = 0;
+    // TODO: switch frame
+
+    int frame;
+    for (unsigned i = 1; i < kNumCubes; i++) {
+      characterFrame = characterFrame == 0 ? 1 : 0;
+      frame = characterFrame;
+
+      if (characterActing[i]) {
+        frame += 2;
+      }
+
+      vid[i].bg1.image(vec(7, 8), characterImages[i], frame);
+    }
+  }
+
 	if (shieldDrain) {
 		energies[3] -= 5;
 		shieldCharge += 5;
