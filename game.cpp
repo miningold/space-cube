@@ -176,6 +176,8 @@ void Game::onTap(unsigned id)
 	bool acting = false;
 	CubeID cube(id);
 
+	if (id == 0) return;
+
 	if (cube.isTouching()) {
 		switch(crew[id]) {
 		case SHIP:
