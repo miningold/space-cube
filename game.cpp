@@ -1,106 +1,106 @@
 #include "game.h"
 
 static AssetSlot MainSlot = AssetSlot::allocate()
-    .bootstrap(GameAssets);
+	.bootstrap(GameAssets);
 
 void Game::onConnect(unsigned cid) {
-  if (ready) {
-    return;
-  }
-  // this cube is either new or reconnected
-  if (lostCubes.test(cid)) {
-    // this is a reconnected cube since it was already lost this paint()
-    lostCubes.clear(cid);
-    reconnectedCubes.mark(cid);
-  } else {
-    // this is a brand-spanking new cube
-    newCubes.mark(cid);
-  }
-  // begin showing some loading art (have to use BG0ROM since we don't have assets)
-  dirtyCubes.mark(cid);
-  auto& g = vid[cid];
-  g.attach(cid);
-  g.initMode(BG0_ROM);
-  g.bg0rom.fill(vec(0,0), vec(16,16), BG0ROMDrawable::SOLID_BG);
-  g.bg0rom.text(vec(1,1), "Hold on!", BG0ROMDrawable::BLUE);
-  g.bg0rom.text(vec(1,14), "Adding Cube...", BG0ROMDrawable::BLUE);
+	if (ready) {
+		return;
+	}
+	// this cube is either new or reconnected
+	if (lostCubes.test(cid)) {
+		// this is a reconnected cube since it was already lost this paint()
+		lostCubes.clear(cid);
+		reconnectedCubes.mark(cid);
+	} else {
+		// this is a brand-spanking new cube
+		newCubes.mark(cid);
+	}
+	// begin showing some loading art (have to use BG0ROM since we don't have assets)
+	dirtyCubes.mark(cid);
+	auto& g = vid[cid];
+	g.attach(cid);
+	g.initMode(BG0_ROM);
+	g.bg0rom.fill(vec(0,0), vec(16,16), BG0ROMDrawable::SOLID_BG);
+	g.bg0rom.text(vec(1,1), "Hold on!", BG0ROMDrawable::BLUE);
+	g.bg0rom.text(vec(1,14), "Adding Cube...", BG0ROMDrawable::BLUE);
 }
 
 void Game::onRefresh(unsigned cid) {
-  if (ready) {
-    return;
-  }
-  LOG("refresh: %d\n", cid);
-  dirtyCubes.mark(cid);
+	if (ready) {
+		return;
+	}
+	LOG("refresh: %d\n", cid);
+	dirtyCubes.mark(cid);
 }
 
 void Game::activateCube(CubeID cid) {
-  // mark cube as active and render its canvas
-  activeCubes.mark(cid);
-  vid[cid].initMode(BG0_SPR_BG1);
+	// mark cube as active and render its canvas
+	activeCubes.mark(cid);
+	vid[cid].initMode(BG0_SPR_BG1);
 
-  if (cid == 0) {
-    vid[cid].bg0.image(vec(0,0), WaitingScreen);
-  } else {
-    vid[cid].bg0.image(vec(0,0), RoomBackground);
+	if (cid == 0) {
+		vid[cid].bg0.image(vec(0,0), WaitingScreen);
+	} else {
+		vid[cid].bg0.image(vec(0,0), RoomBackground);
 
-    auto &bg1 = vid[cid].bg1;
+		auto &bg1 = vid[cid].bg1;
 
-    bg1.setMask(BG1Mask::filled(vec(4, 4), vec(8, 8)));
-    bg1.image(vec(4,4), CheckMark);
-    bg1.setPanning(vec(96,0));
-  }
+		bg1.setMask(BG1Mask::filled(vec(4, 4), vec(8, 8)));
+		bg1.image(vec(4,4), CheckMark);
+		bg1.setPanning(vec(96,0));
+	}
 
-  // TODO: we may or may not have to do this
-  // auto neighbors = vid[cid].physicalNeighbors();
-  // if (neighbors.hasNeighborAt(Side(0))) {
-  //   showConnected(cid, Side(side));
-  // }
+	// TODO: we may or may not have to do this
+	// auto neighbors = vid[cid].physicalNeighbors();
+	// if (neighbors.hasNeighborAt(Side(0))) {
+	//   showConnected(cid, Side(side));
+	// }
 }
 
 void Game::checkConnection(unsigned firstID, unsigned firstSide,
-                           unsigned secondID, unsigned secondSide) {
-  if (firstID == 0 && firstSide != 2) {
-    showConnected(secondID);
-  } else if (secondID == 0 && secondSide != 2) {
-    showConnected(firstID);
-  }
+	unsigned secondID, unsigned secondSide) {
+		if (firstID == 0 && firstSide != 2) {
+			showConnected(secondID);
+		} else if (secondID == 0 && secondSide != 2) {
+			showConnected(firstID);
+		}
 }
 
 void Game::showConnected(CubeID cid) {
-  LOG("Connected and ready\n");
-  readyCubes++;
-  vid[cid].bg1.setPanning(vec(4,4));
+	LOG("Connected and ready\n");
+	readyCubes++;
+	vid[cid].bg1.setPanning(vec(4,4));
 }
 
 void Game::hideConnected(CubeID cid) {
-  readyCubes--;
-  vid[cid].bg1.setPanning(vec(96,0));
+	readyCubes--;
+	vid[cid].bg1.setPanning(vec(96,0));
 }
 
 void Game::onNeighborAdd(unsigned firstID, unsigned firstSide,
-                     unsigned secondID, unsigned secondSide) {
-  if (ready) {
-    return;
-  }
-  if (isActive(firstID) && isActive(secondID)) {
-    checkConnection(firstID, firstSide, secondID, secondSide);
-  }
+	unsigned secondID, unsigned secondSide) {
+		if (ready) {
+			return;
+		}
+		if (isActive(firstID) && isActive(secondID)) {
+			checkConnection(firstID, firstSide, secondID, secondSide);
+		}
 }
 
 void Game::onNeighborRemove(unsigned firstID, unsigned firstSide,
-                   unsigned secondID, unsigned secondSide) {
-  if (ready) {
-    return;
-  }
-  if (firstID == 0 || secondID == 0) {
-    unsigned id = firstID == 0 ? secondID : firstID;
-    hideConnected(id);
-  }
+	unsigned secondID, unsigned secondSide) {
+		if (ready) {
+			return;
+		}
+		if (firstID == 0 || secondID == 0) {
+			unsigned id = firstID == 0 ? secondID : firstID;
+			hideConnected(id);
+		}
 }
 
 bool Game::isActive(NeighborID nid) {
-  return nid.isCube() && activeCubes.test(nid);
+	return nid.isCube() && activeCubes.test(nid);
 }
 
 void Game::onConnect(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
@@ -173,7 +173,7 @@ void Game::onDisconnect(unsigned firstID, unsigned firstSide, unsigned secondID,
 
 void Game::onTap(unsigned id)
 {
-  bool success = false;
+	bool success = false;
 	CubeID cube(id);
 
 	if (cube.isTouching()) {
@@ -186,6 +186,7 @@ void Game::onTap(unsigned id)
 					if (obstacleEncountered && currentObstacle == ASTEROID) {
 						if (energies[id] >= 200) {
 							success = true;
+							firing = true;
 							LOG("Firing lasers! Success! Asteroid destoyed!\n");
 							energies[id] -= 200;
 							FinishObstacle();
@@ -197,6 +198,7 @@ void Game::onTap(unsigned id)
 					else if (obstacleEncountered && currentObstacle == ALIEN) {
 						if (energies[id] >= 500) {
 							success = true;
+							firing = true;
 							LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
 							energies[id] -= 500;
 							FinishObstacle();
@@ -254,154 +256,163 @@ void Game::onTap(unsigned id)
 		LOG("Current state: %d\n", energies[id]);
 	}
 
-  if (cube.isTouching() && success) {
-    characterActing[crew[id]] = true;
-    vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 3);
-    vid[crew[id]].bg1.setPanning(vec(-20,0));
-  } else {
-    characterActing[crew[id]] = false;
-    vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 2);
-    vid[crew[id]].bg1.setPanning(vec(-20,0));
-  }
+	if (firing) {
+		vid[0].sprites[1].setImage(Bullet, 0);
+	}
+
+	if (cube.isTouching() && success) {
+		characterActing[crew[id]] = true;
+		vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 3);
+		vid[crew[id]].bg1.setPanning(vec(-20,0));
+	} else {
+		characterActing[crew[id]] = false;
+		vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 2);
+		vid[crew[id]].bg1.setPanning(vec(-20,0));
+	}
 }
 
 void Game::waitForPlayers() {
-  config.append(MainSlot, GameAssets);
-    loader.init();
+	config.append(MainSlot, GameAssets);
+	loader.init();
 
-  Events::cubeConnect.set(&Game::onConnect, this);
-  Events::cubeRefresh.set(&Game::onRefresh, this);
+	Events::cubeConnect.set(&Game::onConnect, this);
+	Events::cubeRefresh.set(&Game::onRefresh, this);
 
-  Events::neighborAdd.set(&Game::onNeighborAdd, this);
-  Events::neighborRemove.set(&Game::onNeighborRemove, this);
+	Events::neighborAdd.set(&Game::onNeighborAdd, this);
+	Events::neighborRemove.set(&Game::onNeighborRemove, this);
 
-  for(CubeID cid : CubeSet::connected()) {
-    vid[cid].attach(cid);
-    activateCube(cid);
-  }
+	for(CubeID cid : CubeSet::connected()) {
+		vid[cid].attach(cid);
+		activateCube(cid);
+	}
 
-  while (readyCubes < 3) {
-    draw();
-  }
+	while (readyCubes < 3) {
+		draw();
+	}
 
-  for (unsigned i = 0; i < kNumCubes; i++) {
-    vid[i].bg1.eraseMask();
-  }
+	for (unsigned i = 0; i < kNumCubes; i++) {
+		vid[i].bg1.eraseMask();
+	}
 
-  ready = true;
+	ready = true;
 
-  // TODO: unbind waiting stuff
+	// TODO: unbind waiting stuff
 
-  Events::cubeConnect.unset();
-  Events::cubeRefresh.unset();
+	Events::cubeConnect.unset();
+	Events::cubeRefresh.unset();
 
-  Events::neighborAdd.unset();
-  Events::neighborRemove.unset();
+	Events::neighborAdd.unset();
+	Events::neighborRemove.unset();
 }
 
 void Game::draw() {
-  // clear the palette
-  newCubes.clear();
-  lostCubes.clear();
-  reconnectedCubes.clear();
-  dirtyCubes.clear();
+	// clear the palette
+	newCubes.clear();
+	lostCubes.clear();
+	reconnectedCubes.clear();
+	dirtyCubes.clear();
 
-  // fire events
-  System::paint();
+	// fire events
+	System::paint();
 
-  // dynamically load assets just-in-time
-  if (!(newCubes | reconnectedCubes).empty()) {
-      // AudioTracker::pause();
-      // playSfx(SfxConnect);
-      loader.start(config);
-      while(!loader.isComplete()) {
-          for(CubeID cid : (newCubes | reconnectedCubes)) {
-              vid[cid].bg0rom.hBargraph(
-                  vec(0, 4), loader.cubeProgress(cid, 128), BG0ROMDrawable::ORANGE, 8
-              );
-          }
-          // fire events while we wait
-          System::paint();
-      }
-      loader.finish();
-      // AudioTracker::resume();
-  }
+	// dynamically load assets just-in-time
+	if (!(newCubes | reconnectedCubes).empty()) {
+		// AudioTracker::pause();
+		// playSfx(SfxConnect);
+		loader.start(config);
+		while(!loader.isComplete()) {
+			for(CubeID cid : (newCubes | reconnectedCubes)) {
+				vid[cid].bg0rom.hBargraph(
+					vec(0, 4), loader.cubeProgress(cid, 128), BG0ROMDrawable::ORANGE, 8
+					);
+			}
+			// fire events while we wait
+			System::paint();
+		}
+		loader.finish();
+		// AudioTracker::resume();
+	}
 
-  // repaint cubes
-  for(CubeID cid : dirtyCubes) {
-      activateCube(cid);
-  }
+	// repaint cubes
+	for(CubeID cid : dirtyCubes) {
+		activateCube(cid);
+	}
 
-  // also, handle lost cubes, if you so desire :)
+	// also, handle lost cubes, if you so desire :)
 }
 
 void Game::init() {
-  // set background
-  // set ship
-  // setup obstacles?
-  // setup projectiles?
+	// set background
+	// set ship
+	// setup obstacles?
+	// setup projectiles?
 
 
-  Events::cubeTouch.set(&Game::onTap, this);
-  Events::neighborAdd.set(&Game::onConnect, this);
-  Events::neighborRemove.set(&Game::onDisconnect, this);
+	Events::cubeTouch.set(&Game::onTap, this);
+	Events::neighborAdd.set(&Game::onConnect, this);
+	Events::neighborRemove.set(&Game::onDisconnect, this);
 }
 
 void Game::run() {
 	rndm = Random();
 
-  vid[0].bg0.image(vec(0, 0), Stars);
+	vid[0].bg0.image(vec(0, 0), Stars);
 
-  for (int i = 0; i < kNumCubes; i++) {
-	  energies[i] = 1280;
-	  switch (i) {
-	  case 0:
-		  crew[i] = SHIP;
-		  characterImages[i] = Ship;
-		  obstacles[i] = ALIEN;
-		  connectedIDs[i] = 0;
-		  functioning[i] = true;
-		  repairs[i] = tapsNeededToRepair;
-		  break;
-	  case 1:
-		  crew[i] = CAPTAIN;
-		  characterImages[i] = Captain;
-		  obstacles[i] = ASTEROID;
-		  connectedIDs[i] = 0;
-		  functioning[i] = true;
-		  repairs[i] = tapsNeededToRepair;
-		  break;
-	  case 2:
-		  crew[i] = ENGINEER;
-		  characterImages[i] = Engineer;
-		  obstacles[i] = IONSTORM;
-		  connectedIDs[i] = 0;
-		  functioning[i] = true;
-		  repairs[i] = tapsNeededToRepair;
-		  break;
-	  case 3:
-		  crew[i] = SCIENTIST;
-		  connectedIDs[i] = 0;
-		  characterImages[i] = Scientist;
-		  functioning[i] = true;
-		  repairs[i] = tapsNeededToRepair;
-		  break;
-	  }
+	for (int i = 0; i < kNumCubes; i++) {
+		energies[i] = 1280;
+		switch (i) {
+		case 0:
+			crew[i] = SHIP;
+			characterImages[i] = Ship;
+			obstacles[i] = ALIEN;
+			connectedIDs[i] = 0;
+			functioning[i] = true;
+			repairs[i] = tapsNeededToRepair;
+			break;
+		case 1:
+			crew[i] = CAPTAIN;
+			characterImages[i] = Captain;
+			obstacles[i] = ASTEROID;
+			connectedIDs[i] = 0;
+			functioning[i] = true;
+			repairs[i] = tapsNeededToRepair;
+			break;
+		case 2:
+			crew[i] = ENGINEER;
+			characterImages[i] = Engineer;
+			obstacles[i] = IONSTORM;
+			connectedIDs[i] = 0;
+			functioning[i] = true;
+			repairs[i] = tapsNeededToRepair;
+			break;
+		case 3:
+			crew[i] = SCIENTIST;
+			connectedIDs[i] = 0;
+			characterImages[i] = Scientist;
+			functioning[i] = true;
+			repairs[i] = tapsNeededToRepair;
+			break;
+		}
 
-	  if (i == 0) {
-		  vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
-		  vid[i].bg1.image(vec(0,4), characterImages[i], 0);
-	  } else {
-		  vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
-		  vid[i].bg1.image(vec(7, 8), characterImages[i], 0);
-	  }
-  }
+		if (i == 0) {
+			vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
+			vid[i].bg1.image(vec(0,4), characterImages[i], 0);
+		} else {
+			vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+			vid[i].bg1.image(vec(7, 8), characterImages[i], 0);
+		}
+	}
 
 	obstacleEncountered = false;
 	disasterAvoided = false;
 	shieldCharge = 0;
 	assistingShields = false;
 	currentObstacle = NONE;
+
+	bullet.set(52, 60);
+	bulletTarget.set(76, 60);
+
+	vid[0].sprites[0].move(64, 32);
 
 	TimeStep ts;
 
@@ -413,30 +424,49 @@ void Game::run() {
 	}
 }
 
-void Game::Update(TimeDelta timeStep){
+void Game::Update(TimeDelta timeStep) {
 
-  characterTimer += timeStep.seconds();
+	characterTimer += timeStep.seconds();
 
-  if (characterTimer >= characterDuration) {
-    characterTimer = 0;
-    // TODO: switch frame
+	// bullet animation
+	if (firing) {
+		Float2 difference = bulletTarget - bullet;
+		bullet += difference * bulletSpeed;
 
-    for (unsigned i = 1; i < kNumCubes; i++) {
-      if (!characterActing[i]) {
-        characterFrame = characterFrame == 0 ? 1 : 0;
 
-        vid[i].bg1.setPanning(vec(0,0));
-        vid[i].bg1.image(vec(7, 8), characterImages[i], characterFrame);
-      }
-    }
-  }
+		if (difference.len() < 0.7f) {
+			firing = false;
+			bullet.set(52, 60);
+			bulletTarget.set(76, 60);
+			vid[0].sprites[1].hide();
+		} else if (difference.len() < 1.5f) {
+			vid[0].sprites[1].setImage(Bullet, 1);
+			vid[0].sprites[0].hide();
+		}
 
-  for (unsigned i = 1; i < kNumCubes; i++) {
-	  if (repairs[i] <= 0) {
-		  functioning[i] = true;
-		  repairs[i] = tapsNeededToRepair;
-	  }
-  }
+		vid[0].sprites[1].move(bullet);
+	}
+
+	// character animation
+	if (characterTimer >= characterDuration) {
+		characterTimer = 0;
+
+		characterFrame = characterFrame == 0 ? 1 : 0;
+
+		for (unsigned i = 1; i < kNumCubes; i++) {
+			if (!characterActing[i]) {
+				vid[i].bg1.setPanning(vec(0,0));
+				vid[i].bg1.image(vec(7, 8), characterImages[i], characterFrame);
+			}
+		}
+	}
+
+	for (unsigned i = 1; i < kNumCubes; i++) {
+		if (repairs[i] <= 0) {
+			functioning[i] = true;
+			repairs[i] = tapsNeededToRepair;
+		}
+	}
 
 	if (shieldDrain && currentObstacle != NONE) {
 		if (!assistingShields) {
@@ -500,19 +530,26 @@ void Game::Update(TimeDelta timeStep){
 	if (obstacleTimer <= 0.0f) {
 		obstacleTimer = timeBetweenObstacles;
 		currentObstacle = obstacles[rndm.randint(0,2)];
+
+		int obstacleIndex = -1;
 		switch (currentObstacle) {
 		case ALIEN:
 			LOG("ALIEN ENCOUNTERED!\n");
+			obstacleIndex = 1;
 			break;
 		case ASTEROID:
 			LOG("ASTEROID ENCOUNTERED!\n");
+			obstacleIndex = 2;
 			break;
 		case IONSTORM:
 			LOG("ION STORM ENCOUNTERED!\n");
+			obstacleIndex = 0;
 			break;
 		default:
 			break;
 		}
+
+		vid[0].sprites[0].setImage(Obstacles, obstacleIndex);
 		obstacleEncountered = true;
 	}
 
