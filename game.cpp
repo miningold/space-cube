@@ -173,7 +173,7 @@ void Game::onDisconnect(unsigned firstID, unsigned firstSide, unsigned secondID,
 
 void Game::onTap(unsigned id)
 {
-	bool success = false;
+	bool acting = false;
 	CubeID cube(id);
 
 	if (cube.isTouching()) {
@@ -185,7 +185,7 @@ void Game::onTap(unsigned id)
 				if (connectedIDs[id] == 0) {
 					if (obstacleEncountered && currentObstacle == ASTEROID) {
 						if (energies[id] >= 200) {
-							success = true;
+							acting = true;
 							firing = true;
 							LOG("Firing lasers! Success! Asteroid destoyed!\n");
 							energies[id] -= 200;
@@ -197,7 +197,7 @@ void Game::onTap(unsigned id)
 					}
 					else if (obstacleEncountered && currentObstacle == ALIEN) {
 						if (energies[id] >= 500) {
-							success = true;
+							acting = true;
 							firing = true;
 							LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
 							energies[id] -= 500;
@@ -221,7 +221,7 @@ void Game::onTap(unsigned id)
 			if (functioning[id]) {
 				if (connectedIDs[id] == 0) {
 					LOG("Engineer generating power!\n");
-					success = true;
+					acting = true;
 					energies[id] += 5;
 				}
 				LOG("Current state: %d\n", energies[id]);
@@ -236,7 +236,7 @@ void Game::onTap(unsigned id)
 		if (functioning[id]) {
 			if (connectedIDs[id] == 0) {
 				if (cube.isTouching()) {
-					success = true;
+					acting = true;
 					shieldDrain = true;
 				} else {
 					shieldDrain = false;
@@ -260,7 +260,11 @@ void Game::onTap(unsigned id)
 		vid[0].sprites[1].setImage(Bullet, 0);
 	}
 
-	if (cube.isTouching() && success) {
+  if (firing && acting) {
+    showCheckmark();
+  }
+
+	if (cube.isTouching() && acting) {
 		characterActing[crew[id]] = true;
 		vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 3);
 		vid[crew[id]].bg1.setPanning(vec(-20,0));
@@ -412,7 +416,7 @@ void Game::run() {
 	bullet.set(52, 60);
 	bulletTarget.set(76, 60);
 
-	vid[0].sprites[0].move(64, 32);
+	vid[0].sprites[5].move(64, 32);
 
 	TimeStep ts;
 
@@ -441,7 +445,7 @@ void Game::Update(TimeDelta timeStep) {
 			vid[0].sprites[1].hide();
 		} else if (difference.len() < 1.5f) {
 			vid[0].sprites[1].setImage(Bullet, 1);
-			vid[0].sprites[0].hide();
+			vid[0].sprites[5].hide();
 		}
 
 		vid[0].sprites[1].move(bullet);
@@ -460,6 +464,16 @@ void Game::Update(TimeDelta timeStep) {
 			}
 		}
 	}
+
+  // Checkmark
+  if (showCheck) {
+    checkTimer += timeStep.seconds();
+
+    if (checkTimer > checkDuration) {
+      checkTimer = 0;
+      vid[0].sprites[2].hide();
+    }
+  }
 
 	for (unsigned i = 1; i < kNumCubes; i++) {
 		if (repairs[i] <= 0) {
@@ -499,16 +513,19 @@ void Game::Update(TimeDelta timeStep) {
 		LOG("Shield Charge: %d\n", shieldCharge);
 		if (currentObstacle == IONSTORM && shieldCharge >= 100) {
 			LOG("ACTIVATING SHIELDS! You have passed through the ion cloud safely!");
+      showCheckmark();
 			FinishObstacle();
 		}
 
 		if (currentObstacle == ALIEN && shieldCharge >= 200) {
 			LOG("ACTIVATING SHIELDS! You were safely shielded from the alien's weapons!");
+      showCheckmark();
 			FinishObstacle();
 		}
 
 		if (currentObstacle == ASTEROID && shieldCharge >= 150) {
 			LOG("ACTIVATING SHIELDS! You safely deflected the Asteroid!");
+      showCheckmark();
 			FinishObstacle();
 		}
 	}
@@ -549,7 +566,7 @@ void Game::Update(TimeDelta timeStep) {
 			break;
 		}
 
-		vid[0].sprites[0].setImage(Obstacles, obstacleIndex);
+		vid[0].sprites[5].setImage(Obstacles, obstacleIndex);
 		obstacleEncountered = true;
 	}
 
@@ -584,6 +601,13 @@ void Game::DisableCrewMember() {
 		functioning[selection] = false;
 	}
 	return;
+}
+
+void Game::showCheckmark() {
+  showCheck = true;
+  checkTimer = 0;
+  vid[0].sprites[2].setImage(CheckMark);
+  vid[0].sprites[2].move(64, 32);
 }
 
 void Game::cleanup() {
