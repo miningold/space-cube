@@ -266,7 +266,7 @@ void Game::onTap(unsigned id)
 		vid[0].sprites[1].setImage(Bullet, 0);
 	}
 
-  if (shieldDrain) {
+  if (shieldDrain && energies[3] > 0) {
     showShield();
   } else {
     hideShield();
