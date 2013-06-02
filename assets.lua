@@ -10,7 +10,7 @@ CheckMark = image{"checkmark.png", pinned=true, quality=3}
 Stars = image{"stars.png", quality=8.9}
 Ship = image{"ship.png", width=64, height=64, quality=9.95}
 Obstacles = image{"obstacles.png", pinned=true, width=64, height=64, quality=9.8}
-Bullet = image{"bullet.png", pinned=true, width=8, height=8}
+Bullet = image{"bullet.png", pinned=true, width=8, height=16}
 
 RoomBackground = image{"background.png", width=128, height=128, quality=9.5}
 
