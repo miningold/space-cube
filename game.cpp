@@ -487,7 +487,7 @@ void Game::Update(TimeDelta timeStep) {
 		}
 	}
 
-	if (shieldDrain && currentObstacle != NONE) {
+	if (shieldDrain) {
 		if (!assistingShields) {
 			if (energies[3] >= 5) {
 				energies[3] -= 5;
@@ -518,24 +518,24 @@ void Game::Update(TimeDelta timeStep) {
 		LOG("Shield Charge: %d\n", shieldCharge);
 		if (currentObstacle == IONSTORM && shieldCharge >= 100) {
 			LOG("ACTIVATING SHIELDS! You have passed through the ion cloud safely!");
-      showCheckmark();
+			showCheckmark();
 			FinishObstacle();
 		}
 
 		if (currentObstacle == ALIEN && shieldCharge >= 200) {
 			LOG("ACTIVATING SHIELDS! You were safely shielded from the alien's weapons!");
-      showCheckmark();
+			showCheckmark();
 			FinishObstacle();
 		}
 
 		if (currentObstacle == ASTEROID && shieldCharge >= 150) {
 			LOG("ACTIVATING SHIELDS! You safely deflected the Asteroid!");
-      showCheckmark();
+			showCheckmark();
 			FinishObstacle();
 		}
 	}
 
-	if (connectedIDs[2] != 0) {
+	if (connectedIDs[2] != 0 && energies[2] >= 5) {
 		energies[2] -= 5;
 		energies[connectedIDs[2]] += 5;
 		LOG("ENERGY TRANSFER: ENGINEER: %d, #%d: %d\n", energies[2], connectedIDs[2], energies[connectedIDs[2]]);
