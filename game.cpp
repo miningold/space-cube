@@ -179,6 +179,7 @@ void Game::onTap(unsigned id)
 	if (cube.isTouching()) {
 		switch(crew[id]) {
 		case SHIP:
+			return;
 			break;
 		case CAPTAIN:
 			if (functioning[id]) {
@@ -228,6 +229,7 @@ void Game::onTap(unsigned id)
 				break;
 			}
 		default:
+			return;
 			break;
 		}
 	}
@@ -269,14 +271,16 @@ void Game::onTap(unsigned id)
     hideShield();
   }
 
-	if (cube.isTouching() && acting) {
-    LOG("character: %d is acting", id);
-		characterActing[crew[id]] = true;
-    showCharacter(id, vec(76, 64), 3);
-	} else {
-		characterActing[crew[id]] = false;
-    showCharacter(id, vec(76, 64), 2);
-	}
+  if (id != 0) {
+	  if (cube.isTouching() && acting) {
+		  LOG("character: %d is acting", id);
+		  characterActing[crew[id]] = true;
+		  showCharacter(id, vec(76, 64), 3);
+	  } else {
+		  characterActing[crew[id]] = false;
+		  showCharacter(id, vec(76, 64), 2);
+	  }
+  }
 }
 
 void Game::waitForPlayers() {
