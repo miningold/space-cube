@@ -377,6 +377,7 @@ void Game::run() {
 			connectedIDs[i] = 0;
 			functioning[i] = true;
 			repairs[i] = tapsNeededToRepair;
+			warped[i] = false;
 			break;
 		case 1:
 			crew[i] = CAPTAIN;
@@ -385,6 +386,7 @@ void Game::run() {
 			connectedIDs[i] = 0;
 			functioning[i] = true;
 			repairs[i] = tapsNeededToRepair;
+			warped[i] = false;
 			break;
 		case 2:
 			crew[i] = ENGINEER;
@@ -393,13 +395,16 @@ void Game::run() {
 			connectedIDs[i] = 0;
 			functioning[i] = true;
 			repairs[i] = tapsNeededToRepair;
+			warped[i] = false;
 			break;
 		case 3:
 			crew[i] = SCIENTIST;
 			connectedIDs[i] = 0;
+			obstacles[i] = WARP;
 			characterImages[i] = Scientist;
 			functioning[i] = true;
 			repairs[i] = tapsNeededToRepair;
+			warped[i] = false;
 			break;
 		}
 
@@ -427,6 +432,10 @@ void Game::run() {
 	vid[0].sprites[5].move(64, 32);
 
 	TimeStep ts;
+
+			warped[1] = true;
+			warped[2] = true;
+			warped[3] = true;
 
 	// run gameplay code
 	while(1) {
@@ -483,13 +492,22 @@ void Game::Update(TimeDelta timeStep) {
     }
   }
 
-	for (unsigned i = 1; i < kNumCubes; i++) {
-		if (repairs[i] <= 0) {
-			functioning[i] = true;
-      vid[i].bg0.image(vec(0,0), RoomBackground, 0);
-			repairs[i] = tapsNeededToRepair;
-		}
-	}
+  for (unsigned i = 1; i < kNumCubes; i++) {
+	  if (repairs[i] <= 0) {
+		  functioning[i] = true;
+		  vid[i].bg0.image(vec(0,0), RoomBackground, 0);
+		  repairs[i] = tapsNeededToRepair;
+	  }
+
+	  if (warped[i]) {
+		  Int2 accel = vid[i].physicalAccel().xy();
+		  if (accel.y >= 60) {
+			  warped[i] = false;
+			  functioning[i] = true;
+			  vid[i].bg0.image(vec(0,0), RoomBackground, 0);
+		  }
+	  }
+  }
 
 	if (shieldDrain) {
 		if (!assistingShields) {
@@ -560,7 +578,7 @@ void Game::Update(TimeDelta timeStep) {
 
 	if (obstacleTimer <= 0.0f) {
 		obstacleTimer = timeBetweenObstacles;
-		currentObstacle = obstacles[rndm.randint(0,2)];
+		currentObstacle = obstacles[rndm.randint(0,3)];
 
 		int obstacleIndex = -1;
 		switch (currentObstacle) {
@@ -576,6 +594,10 @@ void Game::Update(TimeDelta timeStep) {
 			LOG("ION STORM ENCOUNTERED!\n");
 			obstacleIndex = 0;
 			break;
+		case WARP:
+			LOG("WORMHOLE ENCOUNTERED!\n");
+			//obstacleIndex = 3;
+			break;
 		default:
 			break;
 		}
@@ -585,10 +607,20 @@ void Game::Update(TimeDelta timeStep) {
 	}
 
 	else if (reactionTimer <= 0.0f) {
-    vid[0].sprites[5].hide();
-		DisableCrewMember();
-		FinishObstacle();
-		LOG("RESOLVED!\n");
+		vid[0].sprites[5].hide();
+		if (currentObstacle != WARP) {
+			DisableCrewMember();
+			FinishObstacle();
+			LOG("RESOLVED!\n");
+		}
+		else {
+			functioning[1] = false;
+			functioning[2] = false;
+			functioning[3] = false;
+			warped[1] = true;
+			warped[2] = true;
+			warped[3] = true;
+		}
 	}
 
   updateEnergy();
