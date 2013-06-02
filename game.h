@@ -73,11 +73,20 @@ class Game {
 
   bool isActive(NeighborID nid);
 
+  void showCheckmark();
+
+  void showShield();
+  void hideShield();
+
   // BG1Mask mask;
 
   Float2 bullet, bulletTarget;
   float bulletSpeed = 0.2f;
   bool firing;
+
+  float checkDuration = 1;
+  float checkTimer = 0;
+  bool showCheck;
 
   AssetConfiguration<1> config;
   AssetLoader loader;
