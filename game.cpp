@@ -113,6 +113,7 @@ void Game::onLink(unsigned firstID, unsigned firstSide, unsigned secondID, unsig
 			else {
 				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[firstID] = secondID;
+        showLink(firstID, true);
 				if (firstID == 1 && secondID == 3) {
 					assistingShields = true;
 				}
@@ -128,6 +129,7 @@ void Game::onLink(unsigned firstID, unsigned firstSide, unsigned secondID, unsig
 			else {
 				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[secondID] = firstID;
+        showLink(secondID, true);
 				if (secondID == 1 && firstID == 3) {
 					assistingShields = true;
 				}
@@ -147,6 +149,7 @@ void Game::onUnlink(unsigned firstID, unsigned firstSide, unsigned secondID, uns
 			else {
 				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[firstID] = 0;
+        showLink(firstID, false);
 				if (firstID == 1 && secondID == 3) {
 					assistingShields = false;
 				}
@@ -162,6 +165,7 @@ void Game::onUnlink(unsigned firstID, unsigned firstSide, unsigned secondID, uns
 			else {
 				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[secondID] = 0;
+        showLink(secondID, false);
 				if (secondID == 1 && firstID == 3) {
 					assistingShields = false;
 				}
@@ -417,6 +421,10 @@ void Game::run() {
       vid[i].bg1.setPanning(vec(-11, 5));
 
       showCharacter(i, vec(56, 64), 0);
+
+      // Links
+      showLink(i, false);
+      vid[i].sprites[3].move(48, 32);
 		}
 	}
 
@@ -429,7 +437,9 @@ void Game::run() {
 	bullet.set(52, 60);
 	bulletTarget.set(76, 60);
 
-	vid[0].sprites[5].move(64, 32);
+  // Obstacles
+	vid[0].sprites[5].move(64, 42);
+
 
 	TimeStep ts;
 
@@ -716,6 +726,12 @@ void Game::showCharacter(unsigned id, Int2 pos, int frame) {
   vid[id].sprites[2].setImage(characterImages[id], frame);
   vid[id].sprites[2].move(pos);
   // vid[id].bg1.setPanning(pos);
+}
+
+void Game::showLink(unsigned id, bool linked) {
+  int frame = linked ? 0 : 1;
+
+  vid[id].sprites[3].setImage(Link, frame);
 }
 
 void Game::cleanup() {
