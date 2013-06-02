@@ -27,8 +27,9 @@ class Game {
   bool obstacleEncountered;
   bool disasterAvoided;
 
-  float shieldCharge;
+  int shieldCharge;
   bool transferringPower;
+  bool assistingShields;
 
   OBSTACLE_TYPE currentObstacle;
 

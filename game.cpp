@@ -113,6 +113,9 @@ void Game::onConnect(unsigned firstID, unsigned firstSide, unsigned secondID, un
 			else {
 				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[firstID] = secondID;
+				if (firstID == 1 && secondID == 3) {
+					assistingShields = true;
+				}
 				return;
 			}
 		}
@@ -125,6 +128,9 @@ void Game::onConnect(unsigned firstID, unsigned firstSide, unsigned secondID, un
 			else {
 				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[secondID] = firstID;
+				if (secondID == 1 && firstID == 3) {
+					assistingShields = true;
+				}
 				return;
 			}
 		}
@@ -141,6 +147,9 @@ void Game::onDisconnect(unsigned firstID, unsigned firstSide, unsigned secondID,
 			else {
 				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[firstID] = 0;
+				if (firstID == 1 && secondID == 3) {
+					assistingShields = false;
+				}
 				return;
 			}
 		}
@@ -153,6 +162,9 @@ void Game::onDisconnect(unsigned firstID, unsigned firstSide, unsigned secondID,
 			else {
 				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[secondID] = 0;
+				if (secondID == 1 && firstID == 3) {
+					assistingShields = false;
+				}
 				return;
 			}
 		}
@@ -195,7 +207,10 @@ void Game::onTap(unsigned id)
 					}
 				}
 				else {
-
+					if (connectedIDs[id] == 2) {
+						LOG("ASSISTING ENGINEER: Powering up!\n");
+						energies[connectedIDs[id]] += 5;
+					}
 				}
 			}
 			LOG("Current state: %d\n", energies[id]);
@@ -385,6 +400,8 @@ void Game::run() {
 	obstacleEncountered = false;
 	disasterAvoided = false;
 	shieldCharge = 0;
+	assistingShields = false;
+	currentObstacle = NONE;
 
 	TimeStep ts;
 
@@ -421,10 +438,35 @@ void Game::Update(TimeDelta timeStep){
 	  }
   }
 
-	if (shieldDrain) {
-		energies[3] -= 5;
-		shieldCharge += 5;
-		LOG("Shield Power: %d\n", energies[3]);
+	if (shieldDrain && currentObstacle != NONE) {
+		if (!assistingShields) {
+			if (energies[3] >= 5) {
+				energies[3] -= 5;
+				shieldCharge += 5;
+			}
+		}
+		else {
+			if (energies[3] >= 2 && energies[1] >= 3) {
+				energies[3] -= 2;
+				energies[1] -= 3;
+				shieldCharge += 5;
+			}
+			else {
+				if (energies[3] < 2) {
+					if (energies[1] >= 5) {
+						energies[1] -= 5;
+						shieldCharge += 5;
+					}
+				}
+				else if (energies[1] < 3) {
+					if (energies[3] >= 5) {
+						energies[3] -= 5;
+						shieldCharge += 5;
+					}
+				}
+			}
+		}
+		LOG("Shield Charge: %d\n", shieldCharge);
 		if (currentObstacle == IONSTORM && shieldCharge >= 100) {
 			LOG("ACTIVATING SHIELDS! You have passed through the ion cloud safely!");
 			FinishObstacle();
@@ -432,6 +474,11 @@ void Game::Update(TimeDelta timeStep){
 
 		if (currentObstacle == ALIEN && shieldCharge >= 200) {
 			LOG("ACTIVATING SHIELDS! You were safely shielded from the alien's weapons!");
+			FinishObstacle();
+		}
+
+		if (currentObstacle == ASTEROID && shieldCharge >= 150) {
+			LOG("ACTIVATING SHIELDS! You safely deflected the Asteroid!");
 			FinishObstacle();
 		}
 	}
