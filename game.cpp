@@ -4,6 +4,9 @@ static AssetSlot MainSlot = AssetSlot::allocate()
     .bootstrap(GameAssets);
 
 void Game::onConnect(unsigned cid) {
+  if (ready) {
+    return;
+  }
   // this cube is either new or reconnected
   if (lostCubes.test(cid)) {
     // this is a reconnected cube since it was already lost this paint()
@@ -24,6 +27,9 @@ void Game::onConnect(unsigned cid) {
 }
 
 void Game::onRefresh(unsigned cid) {
+  if (ready) {
+    return;
+  }
   LOG("refresh: %d\n", cid);
   dirtyCubes.mark(cid);
 }
@@ -62,6 +68,7 @@ void Game::checkConnection(unsigned firstID, unsigned firstSide,
 }
 
 void Game::showConnected(CubeID cid) {
+  LOG("Connected and ready\n");
   readyCubes++;
   vid[cid].bg1.setPanning(vec(4,4));
 }
@@ -73,6 +80,9 @@ void Game::hideConnected(CubeID cid) {
 
 void Game::onNeighborAdd(unsigned firstID, unsigned firstSide,
                      unsigned secondID, unsigned secondSide) {
+  if (ready) {
+    return;
+  }
   if (isActive(firstID) && isActive(secondID)) {
     checkConnection(firstID, firstSide, secondID, secondSide);
   }
@@ -80,6 +90,9 @@ void Game::onNeighborAdd(unsigned firstID, unsigned firstSide,
 
 void Game::onNeighborRemove(unsigned firstID, unsigned firstSide,
                    unsigned secondID, unsigned secondSide) {
+  if (ready) {
+    return;
+  }
   if (firstID == 0 || secondID == 0) {
     unsigned id = firstID == 0 ? secondID : firstID;
     hideConnected(id);
@@ -143,7 +156,7 @@ void Game::onTap(unsigned id)
 			shieldDrain = false;
 		}
 		LOG("Current state: %d\n", energies[id]);
-	}	
+	}
 }
 
 void Game::waitForPlayers() {
@@ -168,6 +181,8 @@ void Game::waitForPlayers() {
   for (unsigned i = 0; i < kNumCubes; i++) {
     vid[i].bg1.eraseMask();
   }
+
+  ready = true;
 
   // TODO: unbind waiting stuff
 
@@ -219,9 +234,7 @@ void Game::init() {
   // set ship
   // setup obstacles?
   // setup projectiles?
-  vid[0].bg0.image(vec(0, 0), Stars);
-  vid[0].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
-  vid[0].bg1.image(vec(0,4), Ship, 0);
+
 
   Events::cubeTouch.set(&Game::onTap, this);
   Events::neighborAdd.set(&Game::onNeighborAdd, this);
@@ -231,23 +244,33 @@ void Game::init() {
 void Game::run() {
 	rndm = Random();
 
+  vid[0].bg0.image(vec(0, 0), Stars);
+
 	for (int i = 0; i < kNumCubes; i++) {
 		energies[i] = 1280;
 		switch (i) {
 		case 0:
 			crew[i] = SHIP;
+      vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
+      vid[i].bg1.image(vec(0,4), Ship, 0);
 			obstacles[i] = ALIEN;
 			break;
 		case 1:
 			crew[i] = CAPTAIN;
+      vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+      vid[i].bg1.image(vec(7, 8), Captain, 0);
 			obstacles[i] = ASTEROID;
 			break;
 		case 2:
 			crew[i] = ENGINEER;
+      vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+      vid[i].bg1.image(vec(7, 8), Engineer, 0);
 			obstacles[i] = IONSTORM;
 			break;
 		case 3:
 			crew[i] = SCIENTIST;
+      vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+      vid[i].bg1.image(vec(7, 8), Scientist, 0);
 			break;
 		}
 	}

@@ -17,7 +17,7 @@ class Game {
   int energies[kNumCubes];
   CLASS_TYPE crew[kNumCubes];
   OBSTACLE_TYPE obstacles[3];
-  
+
   bool obstacleEncountered;
   bool disasterAvoided;
 
@@ -59,6 +59,8 @@ class Game {
 
   bool isActive(NeighborID nid);
 
+  // BG1Mask mask;
+
   AssetConfiguration<1> config;
   AssetLoader loader;
 
@@ -71,6 +73,8 @@ class Game {
   CubeSet activeCubes; // cubes showing the active scene
 
   int readyCubes = 0;
+
+  bool ready = false;
 };
 
 #endif
