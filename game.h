@@ -78,6 +78,10 @@ class Game {
   void showShield();
   void hideShield();
 
+  void updateEnergy();
+
+  void showCharacter(unsigned id, Int2 pos, int frame);
+
   // BG1Mask mask;
 
   Float2 bullet, bulletTarget;
@@ -102,7 +106,7 @@ class Game {
   float characterDuration = 1;
   float characterTimer = 0;
 
-  AssetImage characterImages[kNumCubes];
+  PinnedAssetImage characterImages[kNumCubes];
   bool characterActing[kNumCubes];
   int characterFrame = 0;
 

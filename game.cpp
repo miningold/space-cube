@@ -260,7 +260,7 @@ void Game::onTap(unsigned id)
 	}
 
   if (firing && acting) {
-    showCheckmark();
+
   }
 
   if (shieldDrain) {
@@ -270,13 +270,12 @@ void Game::onTap(unsigned id)
   }
 
 	if (cube.isTouching() && acting) {
+    LOG("character: %d is acting", id);
 		characterActing[crew[id]] = true;
-		vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 3);
-		vid[crew[id]].bg1.setPanning(vec(-20,0));
+    showCharacter(id, vec(76, 64), 3);
 	} else {
 		characterActing[crew[id]] = false;
-		vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 2);
-		vid[crew[id]].bg1.setPanning(vec(-20,0));
+    showCharacter(id, vec(76, 64), 2);
 	}
 }
 
@@ -372,7 +371,7 @@ void Game::run() {
 		switch (i) {
 		case 0:
 			crew[i] = SHIP;
-			characterImages[i] = Ship;
+			// characterImages[i] = Ship;
 			obstacles[i] = ALIEN;
 			connectedIDs[i] = 0;
 			functioning[i] = true;
@@ -405,10 +404,10 @@ void Game::run() {
 
 		if (i == 0) {
 			vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
-			vid[i].bg1.image(vec(0,4), characterImages[i], 0);
+			vid[i].bg1.image(vec(0,4), Ship, 0);
 		} else {
-			vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
-			vid[i].bg1.image(vec(7, 8), characterImages[i], 0);
+			// vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+      showCharacter(i, vec(56, 64), 0);
 		}
 	}
 
@@ -450,7 +449,8 @@ void Game::Update(TimeDelta timeStep) {
 			vid[0].sprites[1].hide();
 		} else if (difference.len() < 1.5f) {
 			vid[0].sprites[1].setImage(Bullet, 1);
-			vid[0].sprites[5].hide();
+
+      showCheckmark();
 		}
 
 		vid[0].sprites[1].move(bullet);
@@ -463,10 +463,9 @@ void Game::Update(TimeDelta timeStep) {
 		characterFrame = characterFrame == 0 ? 1 : 0;
 
 		for (unsigned i = 1; i < kNumCubes; i++) {
-			if (!characterActing[i]) {
-				vid[i].bg1.setPanning(vec(0,0));
-				vid[i].bg1.image(vec(7, 8), characterImages[i], characterFrame);
-			}
+			// if (!characterActing[i]) {
+        showCharacter(i, vec(56, 64), characterFrame);
+			// }
 		}
 	}
 
@@ -576,10 +575,13 @@ void Game::Update(TimeDelta timeStep) {
 	}
 
 	else if (reactionTimer <= 0.0f) {
+    vid[0].sprites[5].hide();
 		DisableCrewMember();
 		FinishObstacle();
 		LOG("RESOLVED!\n");
 	}
+
+  updateEnergy();
 }
 
 void Game::FinishObstacle() {
@@ -613,14 +615,28 @@ void Game::showCheckmark() {
   checkTimer = 0;
   vid[0].sprites[2].setImage(CheckMark);
   vid[0].sprites[2].move(64, 32);
+  vid[0].sprites[5].hide();
 }
 
 void Game::showShield() {
-  vid[0].bg1.image(vec(0,4), characterImages[0], 1);
+  vid[0].bg1.image(vec(0,4), Ship, 1);
 }
 
 void Game::hideShield() {
-  vid[0].bg1.image(vec(0,4), characterImages[0], 0);
+  vid[0].bg1.image(vec(0,4), Ship, 0);
+}
+
+void Game::updateEnergy() {
+  // for (unsigned i = 1; i < kNumCubes; i++) {
+  //   String<8> energy;
+  //   energy << energies[i];
+  // }
+}
+
+void Game::showCharacter(unsigned id, Int2 pos, int frame) {
+  vid[id].sprites[2].setImage(characterImages[id], frame);
+  vid[id].sprites[2].move(pos);
+  // vid[id].bg1.setPanning(pos);
 }
 
 void Game::cleanup() {
