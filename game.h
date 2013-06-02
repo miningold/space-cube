@@ -50,7 +50,7 @@ class Game {
 
   void onConnect(unsigned firstID, unsigned firstSide,
 	  unsigned secondID, unsigned secondSide);
-  void onDisconnect(unsigned firstID, unsigned firstSide, 
+  void onDisconnect(unsigned firstID, unsigned firstSide,
 	  unsigned secondID, unsigned secondSide);
 
   void Update(TimeDelta timeStep);
@@ -68,6 +68,10 @@ class Game {
   bool isActive(NeighborID nid);
 
   // BG1Mask mask;
+
+  Float2 bullet, bulletTarget;
+  float bulletSpeed = 0.2f;
+  bool firing;
 
   AssetConfiguration<1> config;
   AssetLoader loader;

@@ -104,124 +104,130 @@ bool Game::isActive(NeighborID nid) {
 }
 
 void Game::onConnect(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
-	if (firstID != 0 && secondID != 0) {
-		if (firstSide == 0) {
-			if (secondSide == 0) {
-				LOG("INCOMPATIBLE CONNECTION\n");
-				return;
-			}
-			else {
-				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
-				connectedIDs[firstID] = secondID;
-				return;
-			}
-		}
+  if (firstID != 0 && secondID != 0) {
+    if (firstSide == 0) {
+      if (secondSide == 0) {
+        LOG("INCOMPATIBLE CONNECTION\n");
+        return;
+      }
+      else {
+        LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
+        connectedIDs[firstID] = secondID;
+        return;
+      }
+    }
 
-		else if (secondSide == 0) {
-			if (firstSide == 0) {
-				LOG("INCOMPATIBLE CONNECTION\n");
-				return;
-			}
-			else {
-				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
-				connectedIDs[secondID] = firstID;
-				return;
-			}
-		}
-	}
+    else if (secondSide == 0) {
+      if (firstSide == 0) {
+        LOG("INCOMPATIBLE CONNECTION\n");
+        return;
+      }
+      else {
+        LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
+        connectedIDs[secondID] = firstID;
+        return;
+      }
+    }
+  }
 }
 
 void Game::onDisconnect(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
-	if (firstID != 0 && secondID != 0) {
-		if (firstSide == 0) {
-			if (secondSide == 0) {
-				LOG("INCOMPATIBLE CONNECTION\n");
-				return;
-			}
-			else {
-				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
-				connectedIDs[firstID] = 0;
-				return;
-			}
-		}
+  if (firstID != 0 && secondID != 0) {
+    if (firstSide == 0) {
+      if (secondSide == 0) {
+        LOG("INCOMPATIBLE CONNECTION\n");
+        return;
+      }
+      else {
+        LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
+        connectedIDs[firstID] = 0;
+        return;
+      }
+    }
 
-		else if (secondSide == 0) {
-			if (firstSide == 0) {
-				LOG("INCOMPATIBLE CONNECTION\n");
-				return;
-			}
-			else {
-				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
-				connectedIDs[secondID] = 0;
-				return;
-			}
-		}
-	}
+    else if (secondSide == 0) {
+      if (firstSide == 0) {
+        LOG("INCOMPATIBLE CONNECTION\n");
+        return;
+      }
+      else {
+        LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
+        connectedIDs[secondID] = 0;
+        return;
+      }
+    }
+  }
 }
 
 void Game::onTap(unsigned id)
 {
   bool success = false;
-	CubeID cube(id);
+  CubeID cube(id);
 
-	if (cube.isTouching()) {
-		switch(crew[id]) {
-		case SHIP:
-			break;
-		case CAPTAIN:
-			if (connectedIDs[id] == 0) {
-				if (obstacleEncountered && currentObstacle == ASTEROID) {
-					if (energies[id] >= 200) {
-						success = true;
-						LOG("Firing lasers! Success! Asteroid destoyed!\n");
-						energies[id] -= 200;
-						FinishObstacle();
-					}
-					else {
-						LOG("Not enough power to fire the lasers!");
-					}
-				}
-				else if (obstacleEncountered && currentObstacle == ALIEN) {
-					if (energies[id] >= 500) {
-						success = true;
-						LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
-						energies[id] -= 500;
-						FinishObstacle();
-					}
-				}
-				else {
-					LOG("There's nothing to fire at!\n");
-				}
-			}
-			else {
+  if (cube.isTouching()) {
+    switch(crew[id]) {
+    case SHIP:
+      break;
+    case CAPTAIN:
+      if (connectedIDs[id] == 0) {
+        if (obstacleEncountered && currentObstacle == ASTEROID) {
+          if (energies[id] >= 200) {
+            success = true;
+            firing = true;
+            LOG("Firing lasers! Success! Asteroid destoyed!\n");
+            energies[id] -= 200;
+            FinishObstacle();
+          }
+          else {
+            LOG("Not enough power to fire the lasers!");
+          }
+        }
+        else if (obstacleEncountered && currentObstacle == ALIEN) {
+          if (energies[id] >= 500) {
+            success = true;
+            firing = true;
+            LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
+            energies[id] -= 500;
+            FinishObstacle();
+          }
+        }
+        else {
+          LOG("There's nothing to fire at!\n");
+        }
+      }
+      else {
 
-			}
-			LOG("Current state: %d\n", energies[id]);
-			break;
-		case ENGINEER:
-			if (connectedIDs[id] == 0) {
-				LOG("Engineer generating power!\n");
-				success = true;
-				energies[id] += 5;
-			}
-			LOG("Current state: %d\n", energies[id]);
-			break;
-		default:
-			break;
-		}
-	}
+      }
+      LOG("Current state: %d\n", energies[id]);
+      break;
+    case ENGINEER:
+      if (connectedIDs[id] == 0) {
+        LOG("Engineer generating power!\n");
+        success = true;
+        energies[id] += 5;
+      }
+      LOG("Current state: %d\n", energies[id]);
+      break;
+    default:
+      break;
+    }
+  }
 
-	if (crew[id] == SCIENTIST) {
-		if (connectedIDs[id] == 0) {
-			if (cube.isTouching()) {
-				success = true;
-				shieldDrain = true;
-			} else {
-				shieldDrain = false;
-			}
-		}
-		LOG("Current state: %d\n", energies[id]);
-	}
+  if (crew[id] == SCIENTIST) {
+    if (connectedIDs[id] == 0) {
+      if (cube.isTouching()) {
+        success = true;
+        shieldDrain = true;
+      } else {
+        shieldDrain = false;
+      }
+    }
+    LOG("Current state: %d\n", energies[id]);
+  }
+
+  if (firing) {
+    vid[0].sprites[1].setImage(Bullet, 0);
+  }
 
   if (cube.isTouching() && success) {
     characterActing[crew[id]] = true;
@@ -317,150 +323,172 @@ void Game::init() {
 }
 
 void Game::run() {
-	rndm = Random();
+  rndm = Random();
 
   vid[0].bg0.image(vec(0, 0), Stars);
 
   for (int i = 0; i < kNumCubes; i++) {
-	  energies[i] = 1280;
-	  switch (i) {
-	  case 0:
-		  crew[i] = SHIP;
+    energies[i] = 1280;
+    switch (i) {
+    case 0:
+      crew[i] = SHIP;
 
-		  characterImages[i] = Ship;
-		  obstacles[i] = ALIEN;
-		  connectedIDs[i] = 0;
-		  break;
-	  case 1:
-		  crew[i] = CAPTAIN;
-		  characterImages[i] = Captain;
-		  obstacles[i] = ASTEROID;
-		  connectedIDs[i] = 0;
-		  break;
-	  case 2:
-		  crew[i] = ENGINEER;
-		  characterImages[i] = Engineer;
-		  obstacles[i] = IONSTORM;
-		  connectedIDs[i] = 0;
-		  break;
-	  case 3:
-		  crew[i] = SCIENTIST;
-		  connectedIDs[i] = 0;
-		  characterImages[i] = Scientist;
-		  break;
-	  }
+      characterImages[i] = Ship;
+      obstacles[i] = ALIEN;
+      connectedIDs[i] = 0;
+      break;
+    case 1:
+      crew[i] = CAPTAIN;
+      characterImages[i] = Captain;
+      obstacles[i] = ASTEROID;
+      connectedIDs[i] = 0;
+      break;
+    case 2:
+      crew[i] = ENGINEER;
+      characterImages[i] = Engineer;
+      obstacles[i] = IONSTORM;
+      connectedIDs[i] = 0;
+      break;
+    case 3:
+      crew[i] = SCIENTIST;
+      connectedIDs[i] = 0;
+      characterImages[i] = Scientist;
+      break;
+    }
 
-	  if (i == 0) {
-		  vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
-		  vid[i].bg1.image(vec(0,4), characterImages[i], 0);
-	  } else {
-		  vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
-		  vid[i].bg1.image(vec(7, 8), characterImages[i], 0);
-	  }
+    if (i == 0) {
+      vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
+      vid[i].bg1.image(vec(0,4), characterImages[i], 0);
+    } else {
+      vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+      vid[i].bg1.image(vec(7, 8), characterImages[i], 0);
+    }
   }
+
+  bullet.set(52, 60);
+  bulletTarget.set(76, 60);
 
   vid[0].sprites[0].move(64, 32);
 
-	obstacleEncountered = false;
-	disasterAvoided = false;
-	shieldCharge = 0;
+  obstacleEncountered = false;
+  disasterAvoided = false;
+  shieldCharge = 0;
 
-	TimeStep ts;
+  TimeStep ts;
 
-	// run gameplay code
-	while(1) {
-		Update(ts.delta());
-		System::paint();
-		ts.next();
-	}
+  // run gameplay code
+  while(1) {
+    Update(ts.delta());
+    System::paint();
+    ts.next();
+  }
 }
 
-void Game::Update(TimeDelta timeStep){
+void Game::Update(TimeDelta timeStep) {
 
   characterTimer += timeStep.seconds();
 
+  // character animation
   if (characterTimer >= characterDuration) {
     characterTimer = 0;
-    // TODO: switch frame
+
+    characterFrame = characterFrame == 0 ? 1 : 0;
 
     for (unsigned i = 1; i < kNumCubes; i++) {
       if (!characterActing[i]) {
-        characterFrame = characterFrame == 0 ? 1 : 0;
-
         vid[i].bg1.setPanning(vec(0,0));
         vid[i].bg1.image(vec(7, 8), characterImages[i], characterFrame);
       }
     }
   }
 
-	if (shieldDrain) {
-		energies[3] -= 5;
-		shieldCharge += 5;
-		LOG("Shield Power: %d\n", energies[3]);
-		if (currentObstacle == IONSTORM && shieldCharge >= 100) {
-			LOG("ACTIVATING SHIELDS! You have passed through the ion cloud safely!");
-			FinishObstacle();
-		}
+  // bullet animation
+  if (firing) {
+    Float2 difference = bulletTarget - bullet;
+    bullet += difference * bulletSpeed;
 
-		if (currentObstacle == ALIEN && shieldCharge >= 200) {
-			LOG("ACTIVATING SHIELDS! You were safely shielded from the alien's weapons!");
-			FinishObstacle();
-		}
-	}
 
-	if (connectedIDs[2] != 0) {
-		energies[2] -= 5;
-		energies[connectedIDs[2]] += 5;
-		LOG("ENERGY TRANSFER: ENGINEER: %d, #%d: %d\n", energies[2], connectedIDs[2], energies[connectedIDs[2]]);
-	}
+    if (difference.len() < 0.7f) {
+      firing = false;
+      bullet.set(52, 60);
+      bulletTarget.set(76, 60);
+      vid[0].sprites[1].hide();
+    } else if (difference.len() < 1.5f) {
+      vid[0].sprites[1].setImage(Bullet, 1);
+      vid[0].sprites[0].hide();
+    }
 
-	if (!obstacleEncountered) {
-		obstacleTimer -= timeStep.seconds();
-	}
+    vid[0].sprites[1].move(bullet);
+  }
 
-	else {
-		reactionTimer -= timeStep.seconds();
-	}
+  if (shieldDrain) {
+    energies[3] -= 5;
+    shieldCharge += 5;
+    LOG("Shield Power: %d\n", energies[3]);
+    if (currentObstacle == IONSTORM && shieldCharge >= 100) {
+      LOG("ACTIVATING SHIELDS! You have passed through the ion cloud safely!");
+      FinishObstacle();
+    }
 
-	if (obstacleTimer <= 0.0f) {
-		obstacleTimer = timeBetweenObstacles;
-		currentObstacle = obstacles[rndm.randint(0,2)];
+    if (currentObstacle == ALIEN && shieldCharge >= 200) {
+      LOG("ACTIVATING SHIELDS! You were safely shielded from the alien's weapons!");
+      FinishObstacle();
+    }
+  }
+
+  if (connectedIDs[2] != 0) {
+    energies[2] -= 5;
+    energies[connectedIDs[2]] += 5;
+    LOG("ENERGY TRANSFER: ENGINEER: %d, #%d: %d\n", energies[2], connectedIDs[2], energies[connectedIDs[2]]);
+  }
+
+  if (!obstacleEncountered) {
+    obstacleTimer -= timeStep.seconds();
+  }
+
+  else {
+    reactionTimer -= timeStep.seconds();
+  }
+
+  if (obstacleTimer <= 0.0f) {
+    obstacleTimer = timeBetweenObstacles;
+    currentObstacle = obstacles[rndm.randint(0,2)];
 
     int obstacleIndex = -1;
-		switch (currentObstacle) {
-		case ALIEN:
-			LOG("ALIEN ENCOUNTERED!\n");
+    switch (currentObstacle) {
+    case ALIEN:
+      LOG("ALIEN ENCOUNTERED!\n");
       obstacleIndex = 1;
-			break;
-		case ASTEROID:
-			LOG("ASTEROID ENCOUNTERED!\n");
+      break;
+    case ASTEROID:
+      LOG("ASTEROID ENCOUNTERED!\n");
       obstacleIndex = 2;
-			break;
-		case IONSTORM:
-			LOG("ION STORM ENCOUNTERED!\n");
+      break;
+    case IONSTORM:
+      LOG("ION STORM ENCOUNTERED!\n");
       obstacleIndex = 0;
-			break;
-		default:
-			break;
-		}
+      break;
+    default:
+      break;
+    }
 
     vid[0].sprites[0].setImage(Obstacles, obstacleIndex);
-		obstacleEncountered = true;
-	}
+    obstacleEncountered = true;
+  }
 
-	else if (reactionTimer <= 0.0f) {
+  else if (reactionTimer <= 0.0f) {
     vid[0].sprites[0].hide();
-		FinishObstacle();
-		LOG("RESOLVED!\n");
-	}
+    FinishObstacle();
+    LOG("RESOLVED!\n");
+  }
 }
 
 void Game::FinishObstacle() {
-	shieldCharge = 0;
-	obstacleEncountered = false;
-	obstacleTimer = timeBetweenObstacles;
-	reactionTimer = timeToReactToObstacle;
-	currentObstacle = NONE;
+  shieldCharge = 0;
+  obstacleEncountered = false;
+  obstacleTimer = timeBetweenObstacles;
+  reactionTimer = timeToReactToObstacle;
+  currentObstacle = NONE;
 }
 
 void Game::cleanup() {
