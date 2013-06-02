@@ -406,7 +406,10 @@ void Game::run() {
 			vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
 			vid[i].bg1.image(vec(0,4), Ship, 0);
 		} else {
-			// vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+      // set energy mask
+      vid[i].bg1.setMask(BG1Mask::filled(vec(0, 14), vec(4, 2)));
+      vid[i].bg1.setPanning(vec(-10, 5));
+
       showCharacter(i, vec(56, 64), 0);
 		}
 	}
@@ -627,10 +630,26 @@ void Game::hideShield() {
 }
 
 void Game::updateEnergy() {
-  // for (unsigned i = 1; i < kNumCubes; i++) {
-  //   String<8> energy;
-  //   energy << energies[i];
-  // }
+  String<8> energy;
+  for (unsigned i = 1; i < kNumCubes; i++) {
+    energy.clear();
+
+    if (energies[i] < 1000) {
+      energy << " ";
+    }
+
+    if (energies[i] < 100) {
+      energy << " ";
+    }
+
+    if (energies[i] < 10) {
+      energy << " ";
+    }
+
+    energy << energies[i];
+
+    vid[i].bg1.text(vec(0, 14), Font, energy);
+  }
 }
 
 void Game::showCharacter(unsigned id, Int2 pos, int frame) {

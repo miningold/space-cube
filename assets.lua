@@ -2,6 +2,8 @@ IconAssets = group{quality=9.95}
 Icon = image{"icon.png"}
 
 GameAssets = group{}
+Font = image{"font-8x16.png", pinned=true, width=8, height=16}
+
 WaitingScreen = image{"waitingscreen.png", quality=9.5}
 CheckMark = image{"checkmark.png", pinned=true, quality=9.8}
 
