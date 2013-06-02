@@ -5,7 +5,7 @@ GameAssets = group{}
 Font = image{"font-8x16.png", pinned=true, width=8, height=16}
 
 WaitingScreen = image{"waitingscreen.png", quality=9.5}
-CheckMark = image{"checkmark.png", pinned=true, quality=9.8}
+CheckMark = image{"checkmark.png", pinned=true, quality=3}
 
 Stars = image{"stars.png", quality=8.9}
 Ship = image{"ship.png", width=64, height=64, quality=9.95}
