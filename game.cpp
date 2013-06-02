@@ -105,6 +105,7 @@ bool Game::isActive(NeighborID nid) {
 
 void Game::onTap(unsigned id)
 {
+  bool success = false;
 	CubeID cube(id);
 
 	if (cube.isTouching()) {
@@ -114,7 +115,8 @@ void Game::onTap(unsigned id)
 			break;
 		case CAPTAIN:
 			if (obstacleEncountered && currentObstacle == ASTEROID) {
-				if (energies[id] >= 200){
+				if (energies[id] >= 200) {
+          success = true;
 					LOG("Firing lasers! Success! Asteroid destoyed!\n");
 					energies[id] -= 200;
 					FinishObstacle();
@@ -124,7 +126,8 @@ void Game::onTap(unsigned id)
 				}
 			}
 			else if (obstacleEncountered && currentObstacle == ALIEN) {
-				if (energies[id] >= 500){
+				if (energies[id] >= 500) {
+          success = true;
 					LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
 					energies[id] -= 500;
 					FinishObstacle();
@@ -140,6 +143,7 @@ void Game::onTap(unsigned id)
 			break;
 		case ENGINEER:
 			LOG("Engineer generating power!\n");
+      success = true;
 			energies[id] += 5;
 			LOG("Current state: %d\n", energies[id]);
 			break;
@@ -150,13 +154,23 @@ void Game::onTap(unsigned id)
 
 	if (crew[id] == SCIENTIST) {
 		if (cube.isTouching()) {
+      success = true;
 			shieldDrain = true;
-		}
-		else {
+		} else {
 			shieldDrain = false;
 		}
 		LOG("Current state: %d\n", energies[id]);
 	}
+
+  if (cube.isTouching() && success) {
+    characterActing[crew[id]] = true;
+    vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 3);
+    vid[crew[id]].bg1.setPanning(vec(-20,0));
+  } else {
+    characterActing[crew[id]] = false;
+    vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 2);
+    vid[crew[id]].bg1.setPanning(vec(-20,0));
+  }
 }
 
 void Game::waitForPlayers() {
@@ -302,16 +316,13 @@ void Game::Update(TimeDelta timeStep){
     characterTimer = 0;
     // TODO: switch frame
 
-    int frame;
     for (unsigned i = 1; i < kNumCubes; i++) {
-      characterFrame = characterFrame == 0 ? 1 : 0;
-      frame = characterFrame;
+      if (!characterActing[i]) {
+        characterFrame = characterFrame == 0 ? 1 : 0;
 
-      if (characterActing[i]) {
-        frame += 2;
+        vid[i].bg1.setPanning(vec(0,0));
+        vid[i].bg1.image(vec(7, 8), characterImages[i], characterFrame);
       }
-
-      vid[i].bg1.image(vec(7, 8), characterImages[i], frame);
     }
   }
 
