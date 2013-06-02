@@ -9,7 +9,7 @@ using namespace Sifteo;
 class Game {
  public:
 	 enum CLASS_TYPE { SHIP, CAPTAIN, ENGINEER, SCIENTIST };
-	 enum OBSTACLE_TYPE { ALIEN, ASTEROID, IONSTORM, NONE };
+	 enum OBSTACLE_TYPE { ALIEN, ASTEROID, IONSTORM, WARP, NONE };
 
   static const unsigned kNumCubes = 4;
   static const float timeBetweenObstacles = 7.5f;
@@ -20,6 +20,7 @@ class Game {
   CLASS_TYPE crew[kNumCubes];
   int connectedIDs[kNumCubes];
   bool functioning[kNumCubes];
+  bool warped[kNumCubes];
   int repairs[kNumCubes];
 
   OBSTACLE_TYPE obstacles[3];
