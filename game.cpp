@@ -4,6 +4,9 @@ static AssetSlot MainSlot = AssetSlot::allocate()
     .bootstrap(GameAssets);
 
 void Game::onConnect(unsigned cid) {
+  if (ready) {
+    return;
+  }
   // this cube is either new or reconnected
   if (lostCubes.test(cid)) {
     // this is a reconnected cube since it was already lost this paint()
@@ -24,6 +27,9 @@ void Game::onConnect(unsigned cid) {
 }
 
 void Game::onRefresh(unsigned cid) {
+  if (ready) {
+    return;
+  }
   LOG("refresh: %d\n", cid);
   dirtyCubes.mark(cid);
 }
@@ -62,6 +68,7 @@ void Game::checkConnection(unsigned firstID, unsigned firstSide,
 }
 
 void Game::showConnected(CubeID cid) {
+  LOG("Connected and ready\n");
   readyCubes++;
   vid[cid].bg1.setPanning(vec(4,4));
 }
@@ -73,6 +80,9 @@ void Game::hideConnected(CubeID cid) {
 
 void Game::onNeighborAdd(unsigned firstID, unsigned firstSide,
                      unsigned secondID, unsigned secondSide) {
+  if (ready) {
+    return;
+  }
   if (isActive(firstID) && isActive(secondID)) {
     checkConnection(firstID, firstSide, secondID, secondSide);
   }
@@ -80,6 +90,9 @@ void Game::onNeighborAdd(unsigned firstID, unsigned firstSide,
 
 void Game::onNeighborRemove(unsigned firstID, unsigned firstSide,
                    unsigned secondID, unsigned secondSide) {
+  if (ready) {
+    return;
+  }
   if (firstID == 0 || secondID == 0) {
     unsigned id = firstID == 0 ? secondID : firstID;
     hideConnected(id);
@@ -148,6 +161,7 @@ void Game::onDisconnect(unsigned firstID, unsigned firstSide, unsigned secondID,
 
 void Game::onTap(unsigned id)
 {
+  bool success = false;
 	CubeID cube(id);
 
 	if (cube.isTouching()) {
@@ -157,7 +171,8 @@ void Game::onTap(unsigned id)
 		case CAPTAIN:
 			if (connectedIDs[id] == 0) {
 				if (obstacleEncountered && currentObstacle == ASTEROID) {
-					if (energies[id] >= 200){
+					if (energies[id] >= 200) {
+						success = true;
 						LOG("Firing lasers! Success! Asteroid destoyed!\n");
 						energies[id] -= 200;
 						FinishObstacle();
@@ -167,13 +182,11 @@ void Game::onTap(unsigned id)
 					}
 				}
 				else if (obstacleEncountered && currentObstacle == ALIEN) {
-					if (energies[id] >= 500){
+					if (energies[id] >= 500) {
+						success = true;
 						LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
 						energies[id] -= 500;
 						FinishObstacle();
-					}
-					else {
-						LOG("Not enough power to fire the lasers!");
 					}
 				}
 				else {
@@ -188,6 +201,7 @@ void Game::onTap(unsigned id)
 		case ENGINEER:
 			if (connectedIDs[id] == 0) {
 				LOG("Engineer generating power!\n");
+				success = true;
 				energies[id] += 5;
 			}
 			LOG("Current state: %d\n", energies[id]);
@@ -200,17 +214,24 @@ void Game::onTap(unsigned id)
 	if (crew[id] == SCIENTIST) {
 		if (connectedIDs[id] == 0) {
 			if (cube.isTouching()) {
+				success = true;
 				shieldDrain = true;
-			}
-			else {
+			} else {
 				shieldDrain = false;
 			}
 		}
-		else {
-
-		}
 		LOG("Current state: %d\n", energies[id]);
-	}	
+	}
+
+  if (cube.isTouching() && success) {
+    characterActing[crew[id]] = true;
+    vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 3);
+    vid[crew[id]].bg1.setPanning(vec(-20,0));
+  } else {
+    characterActing[crew[id]] = false;
+    vid[crew[id]].bg1.image(vec(7, 8), characterImages[crew[id]], 2);
+    vid[crew[id]].bg1.setPanning(vec(-20,0));
+  }
 }
 
 void Game::waitForPlayers() {
@@ -235,6 +256,8 @@ void Game::waitForPlayers() {
   for (unsigned i = 0; i < kNumCubes; i++) {
     vid[i].bg1.eraseMask();
   }
+
+  ready = true;
 
   // TODO: unbind waiting stuff
 
@@ -286,9 +309,7 @@ void Game::init() {
   // set ship
   // setup obstacles?
   // setup projectiles?
-  vid[0].bg0.image(vec(0, 0), Stars);
-  vid[0].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
-  vid[0].bg1.image(vec(0,4), Ship, 0);
+
 
   Events::cubeTouch.set(&Game::onTap, this);
   Events::neighborAdd.set(&Game::onConnect, this);
@@ -298,30 +319,45 @@ void Game::init() {
 void Game::run() {
 	rndm = Random();
 
-	for (int i = 0; i < kNumCubes; i++) {
-		energies[i] = 1280;
-		switch (i) {
-		case 0:
-			crew[i] = SHIP;
-			obstacles[i] = ALIEN;
-			connectedIDs[i] = 0;
-			break;
-		case 1:
-			crew[i] = CAPTAIN;
-			obstacles[i] = ASTEROID;
-			connectedIDs[i] = 0;
-			break;
-		case 2:
-			crew[i] = ENGINEER;
-			obstacles[i] = IONSTORM;
-			connectedIDs[i] = 0;
-			break;
-		case 3:
-			crew[i] = SCIENTIST;
-			connectedIDs[i] = 0;
-			break;
-		}
-	}
+  vid[0].bg0.image(vec(0, 0), Stars);
+
+  for (int i = 0; i < kNumCubes; i++) {
+	  energies[i] = 1280;
+	  switch (i) {
+	  case 0:
+		  crew[i] = SHIP;
+
+		  characterImages[i] = Ship;
+		  obstacles[i] = ALIEN;
+		  connectedIDs[i] = 0;
+		  break;
+	  case 1:
+		  crew[i] = CAPTAIN;
+		  characterImages[i] = Captain;
+		  obstacles[i] = ASTEROID;
+		  connectedIDs[i] = 0;
+		  break;
+	  case 2:
+		  crew[i] = ENGINEER;
+		  characterImages[i] = Engineer;
+		  obstacles[i] = IONSTORM;
+		  connectedIDs[i] = 0;
+		  break;
+	  case 3:
+		  crew[i] = SCIENTIST;
+		  connectedIDs[i] = 0;
+		  characterImages[i] = Scientist;
+		  break;
+	  }
+
+	  if (i == 0) {
+		  vid[i].bg1.setMask(BG1Mask::filled(vec(0, 4), vec(8, 8)));
+		  vid[i].bg1.image(vec(0,4), characterImages[i], 0);
+	  } else {
+		  vid[i].bg1.setMask(BG1Mask::filled(vec(7, 8), vec(4, 8)));
+		  vid[i].bg1.image(vec(7, 8), characterImages[i], 0);
+	  }
+  }
 
 	obstacleEncountered = false;
 	disasterAvoided = false;
@@ -338,6 +374,23 @@ void Game::run() {
 }
 
 void Game::Update(TimeDelta timeStep){
+
+  characterTimer += timeStep.seconds();
+
+  if (characterTimer >= characterDuration) {
+    characterTimer = 0;
+    // TODO: switch frame
+
+    for (unsigned i = 1; i < kNumCubes; i++) {
+      if (!characterActing[i]) {
+        characterFrame = characterFrame == 0 ? 1 : 0;
+
+        vid[i].bg1.setPanning(vec(0,0));
+        vid[i].bg1.image(vec(7, 8), characterImages[i], characterFrame);
+      }
+    }
+  }
+
 	if (shieldDrain) {
 		energies[3] -= 5;
 		shieldCharge += 5;
