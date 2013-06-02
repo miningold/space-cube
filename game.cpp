@@ -90,6 +90,62 @@ bool Game::isActive(NeighborID nid) {
   return nid.isCube() && activeCubes.test(nid);
 }
 
+void Game::onConnect(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
+	if (firstID != 0 && secondID != 0) {
+		if (firstSide == 0) {
+			if (secondSide == 0) {
+				LOG("INCOMPATIBLE CONNECTION\n");
+				return;
+			}
+			else {
+				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
+				connectedIDs[firstID] = secondID;
+				return;
+			}
+		}
+
+		else if (secondSide == 0) {
+			if (firstSide == 0) {
+				LOG("INCOMPATIBLE CONNECTION\n");
+				return;
+			}
+			else {
+				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
+				connectedIDs[secondID] = firstID;
+				return;
+			}
+		}
+	}
+}
+
+void Game::onDisconnect(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
+	if (firstID != 0 && secondID != 0) {
+		if (firstSide == 0) {
+			if (secondSide == 0) {
+				LOG("INCOMPATIBLE CONNECTION\n");
+				return;
+			}
+			else {
+				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
+				connectedIDs[firstID] = 0;
+				return;
+			}
+		}
+
+		else if (secondSide == 0) {
+			if (firstSide == 0) {
+				LOG("INCOMPATIBLE CONNECTION\n");
+				return;
+			}
+			else {
+				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
+				connectedIDs[secondID] = 0;
+				return;
+			}
+		}
+	}
+}
+
 void Game::onTap(unsigned id)
 {
 	CubeID cube(id);
@@ -97,37 +153,43 @@ void Game::onTap(unsigned id)
 	if (cube.isTouching()) {
 		switch(crew[id]) {
 		case SHIP:
-			LOG("Ship is being tapped. What does this do again?\n");
 			break;
 		case CAPTAIN:
-			if (obstacleEncountered && currentObstacle == ASTEROID) {
-				if (energies[id] >= 200){
-					LOG("Firing lasers! Success! Asteroid destoyed!\n");
-					energies[id] -= 200;
-					FinishObstacle();
+			if (connectedIDs[id] == 0) {
+				if (obstacleEncountered && currentObstacle == ASTEROID) {
+					if (energies[id] >= 200){
+						LOG("Firing lasers! Success! Asteroid destoyed!\n");
+						energies[id] -= 200;
+						FinishObstacle();
+					}
+					else {
+						LOG("Not enough power to fire the lasers!");
+					}
+				}
+				else if (obstacleEncountered && currentObstacle == ALIEN) {
+					if (energies[id] >= 500){
+						LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
+						energies[id] -= 500;
+						FinishObstacle();
+					}
+					else {
+						LOG("Not enough power to fire the lasers!");
+					}
 				}
 				else {
-					LOG("Not enough power to fire the lasers!");
-				}
-			}
-			else if (obstacleEncountered && currentObstacle == ALIEN) {
-				if (energies[id] >= 500){
-					LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
-					energies[id] -= 500;
-					FinishObstacle();
-				}
-				else {
-					LOG("Not enough power to fire the lasers!");
+					LOG("There's nothing to fire at!\n");
 				}
 			}
 			else {
-				LOG("There's nothing to fire at!\n");
+
 			}
 			LOG("Current state: %d\n", energies[id]);
 			break;
 		case ENGINEER:
-			LOG("Engineer generating power!\n");
-			energies[id] += 5;
+			if (connectedIDs[id] == 0) {
+				LOG("Engineer generating power!\n");
+				energies[id] += 5;
+			}
 			LOG("Current state: %d\n", energies[id]);
 			break;
 		default:
@@ -136,11 +198,16 @@ void Game::onTap(unsigned id)
 	}
 
 	if (crew[id] == SCIENTIST) {
-		if (cube.isTouching()) {
-			shieldDrain = true;
+		if (connectedIDs[id] == 0) {
+			if (cube.isTouching()) {
+				shieldDrain = true;
+			}
+			else {
+				shieldDrain = false;
+			}
 		}
 		else {
-			shieldDrain = false;
+
 		}
 		LOG("Current state: %d\n", energies[id]);
 	}	
@@ -224,8 +291,8 @@ void Game::init() {
   vid[0].bg1.image(vec(0,4), Ship, 0);
 
   Events::cubeTouch.set(&Game::onTap, this);
-  Events::neighborAdd.set(&Game::onNeighborAdd, this);
-  Events::neighborRemove.set(&Game::onNeighborRemove, this);
+  Events::neighborAdd.set(&Game::onConnect, this);
+  Events::neighborRemove.set(&Game::onDisconnect, this);
 }
 
 void Game::run() {
@@ -237,17 +304,21 @@ void Game::run() {
 		case 0:
 			crew[i] = SHIP;
 			obstacles[i] = ALIEN;
+			connectedIDs[i] = 0;
 			break;
 		case 1:
 			crew[i] = CAPTAIN;
 			obstacles[i] = ASTEROID;
+			connectedIDs[i] = 0;
 			break;
 		case 2:
 			crew[i] = ENGINEER;
 			obstacles[i] = IONSTORM;
+			connectedIDs[i] = 0;
 			break;
 		case 3:
 			crew[i] = SCIENTIST;
+			connectedIDs[i] = 0;
 			break;
 		}
 	}
@@ -280,6 +351,12 @@ void Game::Update(TimeDelta timeStep){
 			LOG("ACTIVATING SHIELDS! You were safely shielded from the alien's weapons!");
 			FinishObstacle();
 		}
+	}
+
+	if (connectedIDs[2] != 0) {
+		energies[2] -= 5;
+		energies[connectedIDs[2]] += 5;
+		LOG("ENERGY TRANSFER: ENGINEER: %d, #%d: %d\n", energies[2], connectedIDs[2], energies[connectedIDs[2]]);
 	}
 
 	if (!obstacleEncountered) {

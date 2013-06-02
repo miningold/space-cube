@@ -10,18 +10,21 @@ class Game {
  public:
 	 enum CLASS_TYPE { SHIP, CAPTAIN, ENGINEER, SCIENTIST };
 	 enum OBSTACLE_TYPE { ALIEN, ASTEROID, IONSTORM, NONE };
+
   static const unsigned kNumCubes = 4;
   static const float timeBetweenObstacles = 5.0f;
   static const float timeToReactToObstacle = 2.5f;
 
   int energies[kNumCubes];
   CLASS_TYPE crew[kNumCubes];
+  int connectedIDs[kNumCubes];
   OBSTACLE_TYPE obstacles[3];
   
   bool obstacleEncountered;
   bool disasterAvoided;
 
   float shieldCharge;
+  bool transferringPower;
 
   OBSTACLE_TYPE currentObstacle;
 
@@ -44,6 +47,11 @@ class Game {
   void onNeighborRemove(unsigned firstID, unsigned firstSide,
                      unsigned secondID, unsigned secondSide);
   void onTap(unsigned id);
+
+  void onConnect(unsigned firstID, unsigned firstSide,
+	  unsigned secondID, unsigned secondSide);
+  void onDisconnect(unsigned firstID, unsigned firstSide, 
+	  unsigned secondID, unsigned secondSide);
 
   void Update(TimeDelta timeStep);
   void FinishObstacle(void);
