@@ -2,8 +2,13 @@ APP = space
 
 include $(SDK_DIR)/Makefile.defs
 
-OBJS = $(ASSETS).gen.o main.o
+OBJS = \
+	$(ASSETS).gen.o \
+	main.o \
+	game.o
+
 ASSETDEPS += *.png $(ASSETS).lua
+CDEPS += *.h
 
 # build assets.html to proof stir-processed assets.
 # comment out to disable.
