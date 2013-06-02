@@ -13,6 +13,9 @@ static Metadata M = Metadata()
     .icon(Icon)
     .cubeRange(0, kNumCubes);
 
+static AssetSlot MainSlot = AssetSlot::allocate()
+    .bootstrap(GameAssets);
+
 static int count = 0;
 
 static VideoBuffer vid[kNumCubes];
@@ -24,7 +27,9 @@ class Space {
  public:
 
   void install() {
-    Events::neighborAdd.set(&Space::onNeighborAdd, this);
+
+    // Events::neighborAdd.set(&Space::onNeighborAdd, this);
+    // Events::neighborRemove.set(&Space::onNeighborRemove, this);
     Events::cubeConnect.set(&Space::onConnect, this);
 
     for (CubeID cube : CubeSet::connected()) {
@@ -42,27 +47,27 @@ class Space {
     vid[id].initMode(BG0_SPR_BG1);
     vid[id].attach(id);
 
-    String<24> str;
-    str << "I am cube #" << cube << "\n";
+    vid[id].bg0.image(vec(0,0), Background);
 
-    vid[cube].bg0rom.text(vec(1, 2), str);
+    // String<24> str;
+    // str << "I am cube #" << cube << "\n";
 
-    str.clear();
+    // vid[cube].bg0rom.text(vec(1, 2), str);
 
-    if (CubeSet::connected().count() < 4) {
-      str << "Waiting...\n";
-      vid[cube].bg0rom.text(vec(1, 3), str);
-    } else {
+    // str.clear();
 
-      int index = 0;
-      for (CubeID cubeID : CubeSet::connected()) {
-        str.clear();
-        str << "YAY!!!!\n";
-        vid[cubeID].bg0rom.text(vec(1, 3), str);
-      }
-    }
+    // if (CubeSet::connected().count() < 4) {
+    //   str << "Waiting...\n";
+    //   vid[cube].bg0rom.text(vec(1, 3), str);
+    // } else {
 
-
+    //   int index = 0;
+    //   for (CubeID cubeID : CubeSet::connected()) {
+    //     str.clear();
+    //     str << "YAY!!!!\n";
+    //     vid[cubeID].bg0rom.text(vec(1, 3), str);
+    //   }
+    // }
   }
 
   void onNeighborAdd(unsigned firstID, unsigned firstSide,
@@ -81,6 +86,11 @@ class Space {
         count++;
       }
     }
+  }
+
+  void onNeighborRemove(unsigned firstID, unsigned firstSide,
+                     unsigned secondID, unsigned secondSide) {
+    LOG("Neighbor Remove: %02x:%d - %02x:%d\n", firstID, firstSide, secondID, secondSide);
   }
 };
 
