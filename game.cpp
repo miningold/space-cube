@@ -440,12 +440,9 @@ void Game::run() {
   // Obstacles
 	vid[0].sprites[5].move(64, 42);
 
+	obstaclesMet = 0;
 
 	TimeStep ts;
-
-			warped[1] = true;
-			warped[2] = true;
-			warped[3] = true;
 
 	// run gameplay code
 	while(1) {
@@ -458,6 +455,16 @@ void Game::run() {
 void Game::Update(TimeDelta timeStep) {
 
 	characterTimer += timeStep.seconds();
+
+	if (obstaclesMet % 3 == 0) {
+		if (timeBetweenObstacles > 1.5f) {
+			timeBetweenObstacles -= 1.0f;
+		}
+
+		if (timeToReactToObstacle > 1.0f) {
+			timeToReactToObstacle -= 1.0f;
+		}
+	}
 
 	// bullet animation
 	if (firing) {
@@ -637,6 +644,7 @@ void Game::Update(TimeDelta timeStep) {
 			FinishObstacle();
 			LOG("RESOLVED!\n");
 		}
+		obstaclesMet++;
 	}
 
   updateEnergy();
