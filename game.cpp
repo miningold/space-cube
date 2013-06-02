@@ -519,6 +519,11 @@ void Game::Update(TimeDelta timeStep) {
 				}
 			}
 		}
+
+		if (currentObstacle == NONE) {
+			shieldCharge = 0;
+		}
+
 		LOG("Shield Charge: %d\n", shieldCharge);
 		if (currentObstacle == IONSTORM && shieldCharge >= 100) {
 			LOG("ACTIVATING SHIELDS! You have passed through the ion cloud safely!");
