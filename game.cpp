@@ -1,6 +1,7 @@
 #include "game.h"
 
 void Game::onConnect(unsigned id) {
+
   LOG("Cube %d connected\n", id);
 
   vid[id].initMode(BG0_SPR_BG1);
@@ -27,13 +28,20 @@ void Game::title() {
   for (CubeID cube : CubeSet::connected()) {
     onConnect(cube);
   }
+  // TODO: show title screen, load assets in background
 };
 
-void Game::init() {
+void Game::waitForPlayers() {
+  // TODO: init cubes for wait for players
+  // Do wait for players logic
+}
 
+void Game::init() {
+  // TODO: init cubes for gameplay
 }
 
 void Game::run() {
+  // run gameplay code
   while(1) {
     System::paint();
   }

@@ -17,6 +17,7 @@ void main() {
 
   while (1) {
     game.title();
+    game.waitForPlayers();
     game.init();
     game.run();
     game.cleanup();

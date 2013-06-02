@@ -11,6 +11,7 @@ class Game {
   static const unsigned kNumCubes = 4;
 
   void title();
+  void waitForPlayers();
   void init();
   void run();
   void cleanup();
