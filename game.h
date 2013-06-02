@@ -12,8 +12,8 @@ class Game {
 	 enum OBSTACLE_TYPE { ALIEN, ASTEROID, IONSTORM, NONE };
 
   static const unsigned kNumCubes = 4;
-  static const float timeBetweenObstacles = 5.0f;
-  static const float timeToReactToObstacle = 2.5f;
+  static const float timeBetweenObstacles = 7.5f;
+  static const float timeToReactToObstacle = 5.0f;
   static const float tapsNeededToRepair = 15;
 
   int energies[kNumCubes];
