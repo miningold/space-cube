@@ -14,10 +14,14 @@ class Game {
   static const unsigned kNumCubes = 4;
   static const float timeBetweenObstacles = 5.0f;
   static const float timeToReactToObstacle = 2.5f;
+  static const float tapsNeededToRepair = 15;
 
   int energies[kNumCubes];
   CLASS_TYPE crew[kNumCubes];
   int connectedIDs[kNumCubes];
+  bool functioning[kNumCubes];
+  int repairs[kNumCubes];
+
   OBSTACLE_TYPE obstacles[3];
 
   bool obstacleEncountered;
@@ -55,6 +59,7 @@ class Game {
 
   void Update(TimeDelta timeStep);
   void FinishObstacle(void);
+  void DisableCrewMember(void);
 
   bool shieldDrain;
 

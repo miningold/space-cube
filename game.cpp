@@ -169,55 +169,71 @@ void Game::onTap(unsigned id)
 		case SHIP:
 			break;
 		case CAPTAIN:
-			if (connectedIDs[id] == 0) {
-				if (obstacleEncountered && currentObstacle == ASTEROID) {
-					if (energies[id] >= 200) {
-						success = true;
-						LOG("Firing lasers! Success! Asteroid destoyed!\n");
-						energies[id] -= 200;
-						FinishObstacle();
+			if (functioning[id]) {
+				if (connectedIDs[id] == 0) {
+					if (obstacleEncountered && currentObstacle == ASTEROID) {
+						if (energies[id] >= 200) {
+							success = true;
+							LOG("Firing lasers! Success! Asteroid destoyed!\n");
+							energies[id] -= 200;
+							FinishObstacle();
+						}
+						else {
+							LOG("Not enough power to fire the lasers!");
+						}
+					}
+					else if (obstacleEncountered && currentObstacle == ALIEN) {
+						if (energies[id] >= 500) {
+							success = true;
+							LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
+							energies[id] -= 500;
+							FinishObstacle();
+						}
 					}
 					else {
-						LOG("Not enough power to fire the lasers!");
-					}
-				}
-				else if (obstacleEncountered && currentObstacle == ALIEN) {
-					if (energies[id] >= 500) {
-						success = true;
-						LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
-						energies[id] -= 500;
-						FinishObstacle();
+						LOG("There's nothing to fire at!\n");
 					}
 				}
 				else {
-					LOG("There's nothing to fire at!\n");
-				}
-			}
-			else {
 
+				}
 			}
 			LOG("Current state: %d\n", energies[id]);
 			break;
 		case ENGINEER:
-			if (connectedIDs[id] == 0) {
-				LOG("Engineer generating power!\n");
-				success = true;
-				energies[id] += 5;
+			if (functioning[id]) {
+				if (connectedIDs[id] == 0) {
+					LOG("Engineer generating power!\n");
+					success = true;
+					energies[id] += 5;
+				}
+				LOG("Current state: %d\n", energies[id]);
+				break;
 			}
-			LOG("Current state: %d\n", energies[id]);
-			break;
 		default:
 			break;
 		}
 	}
 
 	if (crew[id] == SCIENTIST) {
-		if (connectedIDs[id] == 0) {
-			if (cube.isTouching()) {
-				success = true;
-				shieldDrain = true;
-			} else {
-				shieldDrain = false;
+		if (functioning[id]) {
+			if (connectedIDs[id] == 0) {
+				if (cube.isTouching()) {
+					success = true;
+					shieldDrain = true;
+				} else {
+					shieldDrain = false;
+				}
+			}
+			else {
+				if (!functioning[connectedIDs[id]]) {
+					if (repairs[connectedIDs[id]] > 0) {
+						repairs[connectedIDs[id]]--;
+					}
+				}
+				else {
+					LOG("Nothing to repair!\n");
+				}
 			}
 		}
 		LOG("Current state: %d\n", energies[id]);
@@ -326,27 +342,34 @@ void Game::run() {
 	  switch (i) {
 	  case 0:
 		  crew[i] = SHIP;
-
 		  characterImages[i] = Ship;
 		  obstacles[i] = ALIEN;
 		  connectedIDs[i] = 0;
+		  functioning[i] = true;
+		  repairs[i] = tapsNeededToRepair;
 		  break;
 	  case 1:
 		  crew[i] = CAPTAIN;
 		  characterImages[i] = Captain;
 		  obstacles[i] = ASTEROID;
 		  connectedIDs[i] = 0;
+		  functioning[i] = true;
+		  repairs[i] = tapsNeededToRepair;
 		  break;
 	  case 2:
 		  crew[i] = ENGINEER;
 		  characterImages[i] = Engineer;
 		  obstacles[i] = IONSTORM;
 		  connectedIDs[i] = 0;
+		  functioning[i] = true;
+		  repairs[i] = tapsNeededToRepair;
 		  break;
 	  case 3:
 		  crew[i] = SCIENTIST;
 		  connectedIDs[i] = 0;
 		  characterImages[i] = Scientist;
+		  functioning[i] = true;
+		  repairs[i] = tapsNeededToRepair;
 		  break;
 	  }
 
@@ -389,6 +412,13 @@ void Game::Update(TimeDelta timeStep){
         vid[i].bg1.image(vec(7, 8), characterImages[i], characterFrame);
       }
     }
+  }
+
+  for (unsigned i = 1; i < kNumCubes; i++) {
+	  if (repairs[i] <= 0) {
+		  functioning[i] = true;
+		  repairs[i] = tapsNeededToRepair;
+	  }
   }
 
 	if (shieldDrain) {
@@ -440,6 +470,7 @@ void Game::Update(TimeDelta timeStep){
 	}
 
 	else if (reactionTimer <= 0.0f) {
+		DisableCrewMember();
 		FinishObstacle();
 		LOG("RESOLVED!\n");
 	}
@@ -451,6 +482,24 @@ void Game::FinishObstacle() {
 	obstacleTimer = timeBetweenObstacles;
 	reactionTimer = timeToReactToObstacle;
 	currentObstacle = NONE;
+}
+
+void Game::DisableCrewMember() {
+	if (functioning[1] || functioning[2] || functioning[3]) {
+		int selection = rndm.randint(1,3);
+		if (!functioning[1] && !functioning[2]) {
+			functioning[3] = false;
+			return;
+		}
+		else {
+			while (selection == 3 || !functioning[selection]) {
+				selection = rndm.randint(1,3);
+			}
+		}
+
+		functioning[selection] = false;
+	}
+	return;
 }
 
 void Game::cleanup() {
