@@ -491,6 +491,7 @@ void Game::Update(TimeDelta timeStep) {
 	for (unsigned i = 1; i < kNumCubes; i++) {
 		if (repairs[i] <= 0) {
 			functioning[i] = true;
+      vid[i].bg0.image(vec(0,0), RoomBackground, 0);
 			repairs[i] = tapsNeededToRepair;
 		}
 	}
