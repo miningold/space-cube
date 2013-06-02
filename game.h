@@ -53,9 +53,9 @@ class Game {
                      unsigned secondID, unsigned secondSide);
   void onTap(unsigned id);
 
-  void onConnect(unsigned firstID, unsigned firstSide,
+  void onLink(unsigned firstID, unsigned firstSide,
 	  unsigned secondID, unsigned secondSide);
-  void onDisconnect(unsigned firstID, unsigned firstSide,
+  void onUnlink(unsigned firstID, unsigned firstSide,
 	  unsigned secondID, unsigned secondSide);
 
   void Update(TimeDelta timeStep);

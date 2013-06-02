@@ -103,7 +103,7 @@ bool Game::isActive(NeighborID nid) {
 	return nid.isCube() && activeCubes.test(nid);
 }
 
-void Game::onConnect(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
+void Game::onLink(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
 	if (firstID != 0 && secondID != 0) {
 		if (firstSide == 0) {
 			if (secondSide == 0) {
@@ -137,7 +137,7 @@ void Game::onConnect(unsigned firstID, unsigned firstSide, unsigned secondID, un
 	}
 }
 
-void Game::onDisconnect(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
+void Game::onUnlink(unsigned firstID, unsigned firstSide, unsigned secondID, unsigned secondSide) {
 	if (firstID != 0 && secondID != 0) {
 		if (firstSide == 0) {
 			if (secondSide == 0) {
@@ -349,8 +349,8 @@ void Game::init() {
 
 
 	Events::cubeTouch.set(&Game::onTap, this);
-	Events::neighborAdd.set(&Game::onConnect, this);
-	Events::neighborRemove.set(&Game::onDisconnect, this);
+	Events::neighborAdd.set(&Game::onLink, this);
+	Events::neighborRemove.set(&Game::onUnlink, this);
 }
 
 void Game::run() {
