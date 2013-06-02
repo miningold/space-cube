@@ -83,6 +83,8 @@ class Game {
 
   void showCharacter(unsigned id, Int2 pos, int frame);
 
+  void showLink(unsigned id, bool linked);
+
   // BG1Mask mask;
 
   Float2 bullet, bulletTarget;

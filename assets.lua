@@ -13,6 +13,7 @@ Obstacles = image{"obstacles.png", pinned=true, width=64, height=64, quality=9.8
 Bullet = image{"bullet.png", pinned=true, width=8, height=16}
 
 RoomBackground = image{"background.png", width=128, height=128, quality=9.5}
+Link = image{"link.png", pinned=true, width=32, height=16, quality=9.95}
 
 Captain = image{"captain.png", pinned=true, width=32, height=64, quality=9.8}
 Engineer = image{"engineer.png", pinned=true, width=32, height=64, quality=9.8}
