@@ -484,40 +484,6 @@ void Game::Update(TimeDelta timeStep) {
 		vid[0].sprites[1].move(bullet);
 	}
 
-  for (unsigned i = 1; i < kNumCubes; i++) {
-    if (showWork[i]) {
-
-      switch(workState[i]) {
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-          vid[i].sprites[6].move(120, 70);
-          break;
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-          vid[i].sprites[6].move(120, 65);
-          break;
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-          vid[i].sprites[6].move(120, 60);
-          break;
-      }
-
-      workState[i]++;
-
-      if (workState[i] >= 12) {
-        showWork[i] = false;
-        vid[i].sprites[6].hide();
-        workState[i] = 0;
-      }
-    }
-  }
-
 	// character animation
 	if (characterTimer >= characterDuration) {
 		characterTimer = 0;
@@ -558,6 +524,38 @@ void Game::Update(TimeDelta timeStep) {
 			  vid[i].bg0.image(vec(0,0), RoomBackground, 0);
 		  }
 	  }
+
+    if (showWork[i]) {
+
+      switch(workState[i]) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+          vid[i].sprites[6].move(120, 70);
+          break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+          vid[i].sprites[6].move(120, 65);
+          break;
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+          vid[i].sprites[6].move(120, 60);
+          break;
+      }
+
+      workState[i]++;
+
+      if (workState[i] >= 12) {
+        showWork[i] = false;
+        vid[i].sprites[6].hide();
+        workState[i] = 0;
+      }
+    }
   }
 
 	if (shieldDrain) {
@@ -667,8 +665,7 @@ void Game::Update(TimeDelta timeStep) {
 			DisableCrewMember();
 			FinishObstacle();
 			LOG("RESOLVED!\n");
-		}
-		else {
+		} else {
 			functioning[1] = false;
 			functioning[2] = false;
 			functioning[3] = false;
@@ -768,13 +765,17 @@ void Game::updateDamaged() {
     damageFrame -= 4;
   }
 
-  int temp = ((int)damageFrame) % RoomBackground.numFrames();
+  int temp = ((int)damageFrame) % 4;
 
   if (temp != curDamageFrame) {
     curDamageFrame = temp;
 
     for (unsigned i = 0; i < kNumCubes; i++) {
-      if (!functioning[i]) {
+      if (warped[i] && (curDamageFrame % 2) == 0) {
+        vid[i].bg0.image(vec(0,0), RoomBackground, 4);
+      } else if (warped[i]) {
+        vid[i].bg0.image(vec(0,0), RoomBackground, 0);
+      } else if (!functioning[i]) {
         vid[i].bg0.image(vec(0,0), RoomBackground, curDamageFrame);
       }
     }
