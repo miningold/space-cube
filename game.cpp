@@ -456,16 +456,6 @@ void Game::Update(TimeDelta timeStep) {
 
 	characterTimer += timeStep.seconds();
 
-	if (obstaclesMet % 4 == 0) {
-		if (timeBetweenObstacles > 1.5f) {
-			timeBetweenObstacles -= 1.0f;
-		}
-
-		if (timeToReactToObstacle > 1.0f) {
-			timeToReactToObstacle -= 1.0f;
-		}
-	}
-
 	// bullet animation
 	if (firing) {
 		Float2 difference = bulletTarget - bullet;
@@ -653,10 +643,19 @@ void Game::Update(TimeDelta timeStep) {
 void Game::FinishObstacle() {
 	shieldCharge = 0;
 	obstacleEncountered = false;
+	obstaclesMet++;
+	if (obstaclesMet % 4 == 0) {
+		if (timeBetweenObstacles > 1.5f) {
+			timeBetweenObstacles -= 1.0f;
+		}
+
+		if (timeToReactToObstacle > 1.0f) {
+			timeToReactToObstacle -= 1.0f;
+		}
+	}
 	obstacleTimer = timeBetweenObstacles;
 	reactionTimer = timeToReactToObstacle;
 	currentObstacle = NONE;
-	obstaclesMet++;
 }
 
 void Game::DisableCrewMember() {
