@@ -408,7 +408,7 @@ void Game::run() {
 		} else {
       // set energy mask
       vid[i].bg1.setMask(BG1Mask::filled(vec(0, 14), vec(4, 2)));
-      vid[i].bg1.setPanning(vec(-10, 5));
+      vid[i].bg1.setPanning(vec(-11, 5));
 
       showCharacter(i, vec(56, 64), 0);
 		}
