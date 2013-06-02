@@ -606,7 +606,7 @@ void Game::Update(TimeDelta timeStep) {
 			break;
 		case WARP:
 			LOG("WORMHOLE ENCOUNTERED!\n");
-			//obstacleIndex = 3;
+			obstacleIndex = 3;
 			break;
 		default:
 			break;

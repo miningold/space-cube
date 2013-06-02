@@ -23,7 +23,7 @@ class Game {
   bool warped[kNumCubes];
   int repairs[kNumCubes];
 
-  OBSTACLE_TYPE obstacles[3];
+  OBSTACLE_TYPE obstacles[4];
 
   bool obstacleEncountered;
   bool disasterAvoided;
