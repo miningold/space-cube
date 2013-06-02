@@ -122,6 +122,11 @@ class Game {
   int curDamageFrame = 0;
 
   bool ready = false;
+
+  // int workState = 0;
+
+  bool showWork[kNumCubes];
+  int workState[kNumCubes];
 };
 
 #endif

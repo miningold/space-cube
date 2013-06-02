@@ -277,6 +277,12 @@ void Game::onTap(unsigned id)
 		  LOG("character: %d is acting", id);
 		  characterActing[crew[id]] = true;
 		  showCharacter(id, vec(76, 64), 3);
+
+
+      showWork[id] = true;
+      vid[id].sprites[6].setImage(Work);
+
+      // TODO: show work icon
 	  } else {
 		  characterActing[crew[id]] = false;
 		  showCharacter(id, vec(76, 64), 2);
@@ -425,6 +431,8 @@ void Game::run() {
       // Links
       showLink(i, false);
       vid[i].sprites[3].move(48, 32);
+
+
 		}
 	}
 
@@ -476,16 +484,52 @@ void Game::Update(TimeDelta timeStep) {
 		vid[0].sprites[1].move(bullet);
 	}
 
+  for (unsigned i = 1; i < kNumCubes; i++) {
+    if (showWork[i]) {
+
+      switch(workState[i]) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+          vid[i].sprites[6].move(120, 70);
+          break;
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+          vid[i].sprites[6].move(120, 65);
+          break;
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+          vid[i].sprites[6].move(120, 60);
+          break;
+      }
+
+      workState[i]++;
+
+      if (workState[i] >= 12) {
+        showWork[i] = false;
+        vid[i].sprites[6].hide();
+        workState[i] = 0;
+      }
+    }
+  }
+
 	// character animation
 	if (characterTimer >= characterDuration) {
 		characterTimer = 0;
 
 		characterFrame = characterFrame == 0 ? 1 : 0;
 
+    // workState = (workState + 1) % 3;
+
 		for (unsigned i = 1; i < kNumCubes; i++) {
-			// if (!characterActing[i]) {
+			if (!characterActing[i]) {
         showCharacter(i, vec(56, 64), characterFrame);
-			// }
+			}
 		}
 	}
 
@@ -641,11 +685,13 @@ void Game::Update(TimeDelta timeStep) {
 }
 
 void Game::FinishObstacle() {
+  LOG("between: %f\n", timeBetweenObstacles);
 	shieldCharge = 0;
 	obstacleEncountered = false;
 	obstaclesMet++;
 	if (obstaclesMet % 4 == 0) {
 		if (timeBetweenObstacles > 1.5f) {
+
 			timeBetweenObstacles -= 1.0f;
 		}
 
