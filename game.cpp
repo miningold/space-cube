@@ -359,6 +359,8 @@ void Game::run() {
 	  }
   }
 
+  vid[0].sprites[0].move(64, 32);
+
 	obstacleEncountered = false;
 	disasterAvoided = false;
 	shieldCharge = 0;
@@ -423,23 +425,31 @@ void Game::Update(TimeDelta timeStep){
 	if (obstacleTimer <= 0.0f) {
 		obstacleTimer = timeBetweenObstacles;
 		currentObstacle = obstacles[rndm.randint(0,2)];
+
+    int obstacleIndex = -1;
 		switch (currentObstacle) {
 		case ALIEN:
 			LOG("ALIEN ENCOUNTERED!\n");
+      obstacleIndex = 1;
 			break;
 		case ASTEROID:
 			LOG("ASTEROID ENCOUNTERED!\n");
+      obstacleIndex = 2;
 			break;
 		case IONSTORM:
 			LOG("ION STORM ENCOUNTERED!\n");
+      obstacleIndex = 0;
 			break;
 		default:
 			break;
 		}
+
+    vid[0].sprites[0].setImage(Obstacles, obstacleIndex);
 		obstacleEncountered = true;
 	}
 
 	else if (reactionTimer <= 0.0f) {
+    vid[0].sprites[0].hide();
 		FinishObstacle();
 		LOG("RESOLVED!\n");
 	}
