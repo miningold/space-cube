@@ -634,6 +634,8 @@ void Game::Update(TimeDelta timeStep) {
 			warped[1] = true;
 			warped[2] = true;
 			warped[3] = true;
+			FinishObstacle();
+			LOG("RESOLVED!\n");
 		}
 	}
 
