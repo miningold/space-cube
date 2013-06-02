@@ -231,7 +231,6 @@ void Game::onTap(unsigned id)
 				break;
 			}
 		default:
-			return;
 			break;
 		}
 	}
@@ -262,10 +261,6 @@ void Game::onTap(unsigned id)
 	if (firing) {
 		vid[0].sprites[1].setImage(Bullet, 0);
 	}
-
-  if (firing && acting) {
-
-  }
 
   if (shieldDrain) {
     showShield();
