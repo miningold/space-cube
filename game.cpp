@@ -241,8 +241,7 @@ void Game::onTap(unsigned id)
 				} else {
 					shieldDrain = false;
 				}
-			}
-			else {
+			} else {
 				if (!functioning[connectedIDs[id]]) {
 					if (repairs[connectedIDs[id]] > 0) {
 						repairs[connectedIDs[id]]--;
@@ -262,6 +261,12 @@ void Game::onTap(unsigned id)
 
   if (firing && acting) {
     showCheckmark();
+  }
+
+  if (shieldDrain) {
+    showShield();
+  } else {
+    hideShield();
   }
 
 	if (cube.isTouching() && acting) {
@@ -608,6 +613,14 @@ void Game::showCheckmark() {
   checkTimer = 0;
   vid[0].sprites[2].setImage(CheckMark);
   vid[0].sprites[2].move(64, 32);
+}
+
+void Game::showShield() {
+  vid[0].bg1.image(vec(0,4), characterImages[0], 1);
+}
+
+void Game::hideShield() {
+  vid[0].bg1.image(vec(0,4), characterImages[0], 0);
 }
 
 void Game::cleanup() {

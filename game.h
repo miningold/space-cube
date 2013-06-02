@@ -75,6 +75,9 @@ class Game {
 
   void showCheckmark();
 
+  void showShield();
+  void hideShield();
+
   // BG1Mask mask;
 
   Float2 bullet, bulletTarget;
