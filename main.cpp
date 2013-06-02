@@ -3,8 +3,8 @@
 #include <sifteo.h>
 #include "assets.gen.h"
 
-static AssetSlot MainSlot = AssetSlot::allocate()
-    .bootstrap(GameAssets);
+// static AssetSlot MainSlot = AssetSlot::allocate()
+//     .bootstrap(GameAssets);
 
 static Metadata M = Metadata()
     .title("Space")
@@ -16,7 +16,6 @@ void main() {
   static Game game;
 
   while (1) {
-    game.title();
     game.waitForPlayers();
     game.init();
     game.run();
