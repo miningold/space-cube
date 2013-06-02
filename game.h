@@ -79,6 +79,7 @@ class Game {
   void hideShield();
 
   void updateEnergy();
+  void updateDamaged();
 
   void showCharacter(unsigned id, Int2 pos, int frame);
 
@@ -111,6 +112,9 @@ class Game {
   int characterFrame = 0;
 
   int readyCubes = 0;
+
+  float damageFrame = 0;
+  int curDamageFrame = 0;
 
   bool ready = false;
 };

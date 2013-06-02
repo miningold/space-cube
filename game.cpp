@@ -589,6 +589,7 @@ void Game::Update(TimeDelta timeStep) {
 	}
 
   updateEnergy();
+  updateDamaged();
 }
 
 void Game::FinishObstacle() {
@@ -653,6 +654,26 @@ void Game::updateEnergy() {
     energy << energies[i];
 
     vid[i].bg1.text(vec(0, 14), Font, energy);
+  }
+}
+
+void Game::updateDamaged() {
+  damageFrame += 0.2f;
+
+  if (damageFrame > 4) {
+    damageFrame -= 4;
+  }
+
+  int temp = ((int)damageFrame) % RoomBackground.numFrames();
+
+  if (temp != curDamageFrame) {
+    curDamageFrame = temp;
+
+    for (unsigned i = 0; i < kNumCubes; i++) {
+      if (!functioning[i]) {
+        vid[i].bg0.image(vec(0,0), RoomBackground, curDamageFrame);
+      }
+    }
   }
 }
 
