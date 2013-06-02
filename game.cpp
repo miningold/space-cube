@@ -218,6 +218,8 @@ void Game::onTap(unsigned id)
 				else {
 					if (connectedIDs[id] == 2) {
 						LOG("ASSISTING ENGINEER: Powering up!\n");
+            showWork[id] = true;
+            vid[id].sprites[6].setImage(Work);
 						energies[connectedIDs[id]] += 5;
 					}
 				}
