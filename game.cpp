@@ -456,7 +456,7 @@ void Game::Update(TimeDelta timeStep) {
 
 	characterTimer += timeStep.seconds();
 
-	if (obstaclesMet % 3 == 0) {
+	if (obstaclesMet % 4 == 0) {
 		if (timeBetweenObstacles > 1.5f) {
 			timeBetweenObstacles -= 1.0f;
 		}
@@ -644,7 +644,6 @@ void Game::Update(TimeDelta timeStep) {
 			FinishObstacle();
 			LOG("RESOLVED!\n");
 		}
-		obstaclesMet++;
 	}
 
   updateEnergy();
@@ -657,6 +656,7 @@ void Game::FinishObstacle() {
 	obstacleTimer = timeBetweenObstacles;
 	reactionTimer = timeToReactToObstacle;
 	currentObstacle = NONE;
+	obstaclesMet++;
 }
 
 void Game::DisableCrewMember() {
