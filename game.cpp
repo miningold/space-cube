@@ -689,7 +689,7 @@ void Game::FinishObstacle() {
 	obstacleEncountered = false;
 	obstaclesMet++;
 	if (obstaclesMet % 4 == 0) {
-		if (timeBetweenObstacles > 1.5f) {
+		if (timeBetweenObstacles > 2.5f) {
 
 			timeBetweenObstacles -= 1.0f;
 		}
