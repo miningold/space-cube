@@ -7,8 +7,8 @@
 //     .bootstrap(GameAssets);
 
 static Metadata M = Metadata()
-    .title("Space")
-    .package("com.spaceteam.space", "1.0")
+    .title("Super Space Cubed")
+    .package("com.spaceteam6.ss3", "1.0")
     .icon(Icon)
     .cubeRange(0, Game::kNumCubes);
 
