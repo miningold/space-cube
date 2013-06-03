@@ -431,6 +431,8 @@ void Game::run() {
 
 	obstaclesMet = 0;
 
+  shake.set(0, 1);
+
 	TimeStep ts;
 
 	// run gameplay code
@@ -442,6 +444,18 @@ void Game::run() {
 }
 
 void Game::Update(TimeDelta timeStep) {
+
+  if (!functioning[3] && !warped[3]) {
+    vid[0].bg1.setPanning(shake);
+    shake.set(0, -shake.y);
+
+    for (unsigned i = 1; i < kNumCubes; i++) {
+      vid[i].bg0.image(vec(0,0), RoomBackground, 3);
+    }
+
+    System::paint();
+    return;
+  }
 
 	characterTimer += timeStep.seconds();
 

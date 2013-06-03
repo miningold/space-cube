@@ -123,6 +123,8 @@ class Game {
 
   bool ready = false;
 
+  Float2 shake;
+
   // int workState = 0;
 
   bool showWork[kNumCubes];
