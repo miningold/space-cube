@@ -30,7 +30,6 @@ void Game::onRefresh(unsigned cid) {
 	if (ready) {
 		return;
 	}
-	LOG("refresh: %d\n", cid);
 	dirtyCubes.mark(cid);
 }
 
@@ -68,7 +67,6 @@ void Game::checkConnection(unsigned firstID, unsigned firstSide,
 }
 
 void Game::showConnected(CubeID cid) {
-	LOG("Connected and ready\n");
 	readyCubes++;
 	vid[cid].bg1.setPanning(vec(4,4));
 }
@@ -107,11 +105,9 @@ void Game::onLink(unsigned firstID, unsigned firstSide, unsigned secondID, unsig
 	if (firstID != 0 && secondID != 0) {
 		if (firstSide == 0) {
 			if (secondSide == 0) {
-				LOG("INCOMPATIBLE CONNECTION\n");
 				return;
 			}
 			else {
-				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[firstID] = secondID;
         showLink(firstID, true);
 				if (firstID == 1 && secondID == 3) {
@@ -123,11 +119,9 @@ void Game::onLink(unsigned firstID, unsigned firstSide, unsigned secondID, unsig
 
 		else if (secondSide == 0) {
 			if (firstSide == 0) {
-				LOG("INCOMPATIBLE CONNECTION\n");
 				return;
 			}
 			else {
-				LOG("#%d is connected at side #%d to #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[secondID] = firstID;
         showLink(secondID, true);
 				if (secondID == 1 && firstID == 3) {
@@ -143,11 +137,9 @@ void Game::onUnlink(unsigned firstID, unsigned firstSide, unsigned secondID, uns
 	if (firstID != 0 && secondID != 0) {
 		if (firstSide == 0) {
 			if (secondSide == 0) {
-				LOG("INCOMPATIBLE CONNECTION\n");
 				return;
 			}
 			else {
-				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[firstID] = 0;
         showLink(firstID, false);
 				if (firstID == 1 && secondID == 3) {
@@ -159,11 +151,9 @@ void Game::onUnlink(unsigned firstID, unsigned firstSide, unsigned secondID, uns
 
 		else if (secondSide == 0) {
 			if (firstSide == 0) {
-				LOG("INCOMPATIBLE CONNECTION\n");
 				return;
 			}
 			else {
-				LOG("#%d disconnected at side #%d from #%d at side #%d\n", firstID, firstSide, secondID, secondSide);
 				connectedIDs[secondID] = 0;
         showLink(secondID, false);
 				if (secondID == 1 && firstID == 3) {
@@ -194,46 +184,38 @@ void Game::onTap(unsigned id)
 						if (energies[id] >= 200) {
 							acting = true;
 							firing = true;
-							LOG("Firing lasers! Success! Asteroid destoyed!\n");
 							energies[id] -= 200;
 							FinishObstacle();
 						}
 						else {
-							LOG("Not enough power to fire the lasers!");
 						}
 					}
 					else if (obstacleEncountered && currentObstacle == ALIEN) {
 						if (energies[id] >= 500) {
 							acting = true;
 							firing = true;
-							LOG("Firing lasers! Success! Alien spacecraft destoyed!\n");
 							energies[id] -= 500;
 							FinishObstacle();
 						}
 					}
 					else {
-						LOG("There's nothing to fire at!\n");
 					}
 				}
 				else {
 					if (connectedIDs[id] == 2) {
-						LOG("ASSISTING ENGINEER: Powering up!\n");
             showWork[id] = true;
             vid[id].sprites[6].setImage(Work);
 						energies[connectedIDs[id]] += 5;
 					}
 				}
 			}
-			LOG("Current state: %d\n", energies[id]);
 			break;
 		case ENGINEER:
 			if (functioning[id]) {
 				if (connectedIDs[id] == 0) {
-					LOG("Engineer generating power!\n");
 					acting = true;
 					energies[id] += 5;
 				}
-				LOG("Current state: %d\n", energies[id]);
 				break;
 			}
 		default:
@@ -257,11 +239,9 @@ void Game::onTap(unsigned id)
 					}
 				}
 				else {
-					LOG("Nothing to repair!\n");
 				}
 			}
 		}
-		LOG("Current state: %d\n", energies[id]);
 	}
 
 	if (firing) {
@@ -276,7 +256,6 @@ void Game::onTap(unsigned id)
 
   if (id != 0) {
 	  if (cube.isTouching() && acting) {
-		  LOG("character: %d is acting", id);
 		  characterActing[crew[id]] = true;
 		  showCharacter(id, vec(76, 64), 3);
 
@@ -597,21 +576,17 @@ void Game::Update(TimeDelta timeStep) {
 			hideShield();
 		}
 
-		LOG("Shield Charge: %d\n", shieldCharge);
 		if (currentObstacle == IONSTORM && shieldCharge >= 100) {
-			LOG("ACTIVATING SHIELDS! You have passed through the ion cloud safely!");
 			showCheckmark();
 			FinishObstacle();
 		}
 
 		if (currentObstacle == ALIEN && shieldCharge >= 200) {
-			LOG("ACTIVATING SHIELDS! You were safely shielded from the alien's weapons!");
 			showCheckmark();
 			FinishObstacle();
 		}
 
 		if (currentObstacle == ASTEROID && shieldCharge >= 150) {
-			LOG("ACTIVATING SHIELDS! You safely deflected the Asteroid!");
 			showCheckmark();
 			FinishObstacle();
 		}
@@ -620,7 +595,6 @@ void Game::Update(TimeDelta timeStep) {
 	if (connectedIDs[2] != 0 && energies[2] >= 5) {
 		energies[2] -= 5;
 		energies[connectedIDs[2]] += 5;
-		LOG("ENERGY TRANSFER: ENGINEER: %d, #%d: %d\n", energies[2], connectedIDs[2], energies[connectedIDs[2]]);
 	}
 
 	if (!obstacleEncountered) {
@@ -638,19 +612,15 @@ void Game::Update(TimeDelta timeStep) {
 		int obstacleIndex = -1;
 		switch (currentObstacle) {
 		case ALIEN:
-			LOG("ALIEN ENCOUNTERED!\n");
 			obstacleIndex = 1;
 			break;
 		case ASTEROID:
-			LOG("ASTEROID ENCOUNTERED!\n");
 			obstacleIndex = 2;
 			break;
 		case IONSTORM:
-			LOG("ION STORM ENCOUNTERED!\n");
 			obstacleIndex = 0;
 			break;
 		case WARP:
-			LOG("WORMHOLE ENCOUNTERED!\n");
 			obstacleIndex = 3;
 			break;
 		default:
@@ -666,7 +636,6 @@ void Game::Update(TimeDelta timeStep) {
 		if (currentObstacle != WARP) {
 			DisableCrewMember();
 			FinishObstacle();
-			LOG("RESOLVED!\n");
 		} else {
 			functioning[1] = false;
 			functioning[2] = false;
@@ -675,7 +644,6 @@ void Game::Update(TimeDelta timeStep) {
 			warped[2] = true;
 			warped[3] = true;
 			FinishObstacle();
-			LOG("RESOLVED!\n");
 		}
 	}
 
@@ -684,7 +652,6 @@ void Game::Update(TimeDelta timeStep) {
 }
 
 void Game::FinishObstacle() {
-  LOG("between: %f\n", timeBetweenObstacles);
 	shieldCharge = 0;
 	obstacleEncountered = false;
 	obstaclesMet++;
